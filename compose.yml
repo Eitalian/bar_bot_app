@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: bar-bot-app
+    restart: unless-stopped
+    ports:
+      - "88:8080"
+    volumes:
+      - .:/var/www
+      - ./data:/var/www/data
+    command: |
+      sh -c "php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=8080 --watch"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bar-net
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: bar-bot-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - barbot_postgres-data:/var/lib/postgresql/data
+    #    command: [ "postgres", "-c", "log_statement=all", "-c", "log_destination=stderr" ]
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${DB_DATABASE}", "-U", "${DB_USERNAME}" ]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bar-net
+    ports:
+      - 5433:5432
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: bar-bot-ngrok
+    restart: unless-stopped
+    command: http app:8080 --log=stdout
+    environment:
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    ports:
+      - "4040:4040"
+    depends_on:
+      - app
+    networks:
+      - bar-net
+
+volumes:
+  barbot_postgres-data:
+    external: true
+
+networks:
+  bar-net:
+    driver: bridge
