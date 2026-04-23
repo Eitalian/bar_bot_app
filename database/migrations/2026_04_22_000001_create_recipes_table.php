@@ -15,7 +15,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->text('instructions')->nullable();
             $table->string('glass')->nullable();
-            $table->float('abv')->nullable();
+            $table->decimal('abv', 5, 2)->nullable();
             $table->integer('volume')->nullable();
             $table->string('icon')->nullable();
             $table->string('photo')->nullable();
