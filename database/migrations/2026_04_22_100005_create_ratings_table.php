@@ -1,25 +1,32 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ratings', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('recipe_id');
-            $table->foreign('recipe_id')->references('id')->on('recipes')->cascadeOnDelete();
-            $table->unsignedTinyInteger('score');
-            $table->primary(['user_id', 'recipe_id']);
-            $table->timestamps();
-        });
+        DB::unprepared(/** @lang PostgreSQL */ "
+            CREATE TABLE ratings (
+                user_id    BIGINT      NOT NULL,
+                recipe_id  UUID        NOT NULL,
+                score      SMALLINT    NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                CONSTRAINT pk_ratings PRIMARY KEY (user_id, recipe_id),
+                CONSTRAINT fk_ratings_user_id
+                    FOREIGN KEY (user_id)   REFERENCES users   (id) ON DELETE CASCADE,
+                CONSTRAINT fk_ratings_recipe_id
+                    FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
+            );
+        ");
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('ratings');
+        DB::unprepared(/** @lang PostgreSQL */ "
+            DROP TABLE IF EXISTS ratings;
+        ");
     }
 };
