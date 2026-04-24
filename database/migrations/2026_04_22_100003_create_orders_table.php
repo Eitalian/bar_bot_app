@@ -1,27 +1,40 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('session_id')->constrained('bar_sessions')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('recipe_id');
-            $table->foreign('recipe_id')->references('id')->on('recipes')->cascadeOnDelete();
-            $table->unsignedTinyInteger('quantity')->nullable();
-            $table->enum('status', ['pending', 'accepted', 'cancelled'])->default('pending');
-            $table->timestamps();
-        });
+        DB::unprepared(/** @lang PostgreSQL */ "
+            CREATE TYPE order_status_type AS ENUM ('pending', 'accepted', 'cancelled');
+
+            CREATE TABLE orders (
+                id         BIGINT            GENERATED ALWAYS AS IDENTITY,
+                session_id BIGINT            NOT NULL,
+                user_id    BIGINT            NOT NULL,
+                recipe_id  UUID              NOT NULL,
+                quantity   SMALLINT          NULL,
+                status     order_status_type NOT NULL DEFAULT 'pending',
+                created_at TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+                CONSTRAINT pk_orders PRIMARY KEY (id),
+                CONSTRAINT fk_orders_session_id
+                    FOREIGN KEY (session_id) REFERENCES bar_sessions (id) ON DELETE CASCADE,
+                CONSTRAINT fk_orders_user_id
+                    FOREIGN KEY (user_id)    REFERENCES users        (id) ON DELETE CASCADE,
+                CONSTRAINT fk_orders_recipe_id
+                    FOREIGN KEY (recipe_id)  REFERENCES recipes      (id) ON DELETE CASCADE
+            );
+        ");
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        DB::unprepared(/** @lang PostgreSQL */ "
+            DROP TABLE IF EXISTS orders;
+            DROP TYPE  IF EXISTS order_status_type;
+        ");
     }
 };
