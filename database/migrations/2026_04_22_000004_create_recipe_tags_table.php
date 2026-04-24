@@ -10,7 +10,7 @@ return new class extends Migration
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE recipe_tags (
                 id        BIGINT       GENERATED ALWAYS AS IDENTITY,
-                recipe_id UUID         NOT NULL,
+                recipe_id TEXT         NOT NULL,
                 tag       VARCHAR(255) NOT NULL,
                 CONSTRAINT pk_recipe_tags PRIMARY KEY (id),
                 CONSTRAINT fk_recipe_tags_recipe_id

@@ -10,7 +10,7 @@ return new class extends Migration
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE recipe_photos (
                 id               BIGINT      GENERATED ALWAYS AS IDENTITY,
-                recipe_id        UUID        NOT NULL,
+                recipe_id        TEXT        NOT NULL,
                 user_id          BIGINT      NOT NULL,
                 telegram_file_id TEXT        NOT NULL,
                 created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -52,8 +52,15 @@ CONSTRAINT pk_{table} PRIMARY KEY (id)
 id UUID NOT NULL DEFAULT uuidv7(),
 CONSTRAINT pk_{table} PRIMARY KEY (id)
 ```
-Использовать для сущностей, которые экспортируются/импортируются (recipes, ingredients).
 Нативная функция PostgreSQL 18 — расширений не требует. Гарантирует монотонность в рамках сессии.
+Использовать для сущностей, создаваемых приложением.
+
+### TEXT (для импортируемых сущностей)
+```sql
+id TEXT NOT NULL,
+CONSTRAINT pk_{table} PRIMARY KEY (id)
+```
+Использовать когда ID приходят из внешнего источника и не являются UUID (например, `recipes`, `ingredients` — слаги из импорта MyBar).
 
 ### Составной PK (без суррогатного ключа)
 ```sql

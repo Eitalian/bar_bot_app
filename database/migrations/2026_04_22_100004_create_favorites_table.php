@@ -10,7 +10,7 @@ return new class extends Migration
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE favorites (
                 user_id    BIGINT      NOT NULL,
-                recipe_id  UUID        NOT NULL,
+                recipe_id  TEXT        NOT NULL,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 CONSTRAINT pk_favorites PRIMARY KEY (user_id, recipe_id),

@@ -14,7 +14,7 @@ return new class extends Migration
                 id         BIGINT            GENERATED ALWAYS AS IDENTITY,
                 session_id BIGINT            NOT NULL,
                 user_id    BIGINT            NOT NULL,
-                recipe_id  UUID              NOT NULL,
+                recipe_id  TEXT              NOT NULL,
                 quantity   SMALLINT          NULL,
                 status     order_status_type NOT NULL DEFAULT 'pending',
                 created_at TIMESTAMPTZ       NOT NULL DEFAULT NOW(),

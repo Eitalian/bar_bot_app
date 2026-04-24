@@ -10,7 +10,7 @@ return new class extends Migration
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE ratings (
                 user_id    BIGINT      NOT NULL,
-                recipe_id  UUID        NOT NULL,
+                recipe_id  TEXT        NOT NULL,
                 score      SMALLINT    NOT NULL,
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

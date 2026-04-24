@@ -11,7 +11,7 @@ return new class extends Migration
             CREATE TABLE bar_inventory (
                 id            BIGINT       GENERATED ALWAYS AS IDENTITY,
                 user_id       BIGINT       NOT NULL,
-                ingredient_id UUID         NOT NULL,
+                ingredient_id TEXT         NOT NULL,
                 quantity      NUMERIC(8,2) NULL,
                 unit          VARCHAR(20)  NULL,
                 created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
