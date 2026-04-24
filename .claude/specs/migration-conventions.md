@@ -49,11 +49,11 @@ CONSTRAINT pk_{table} PRIMARY KEY (id)
 
 ### UUID v7
 ```sql
-id UUID NOT NULL DEFAULT uuid_generate_v7(),
+id UUID NOT NULL DEFAULT uuidv7(),
 CONSTRAINT pk_{table} PRIMARY KEY (id)
 ```
 Использовать для сущностей, которые экспортируются/импортируются (recipes, ingredients).
-Требует расширение `pg_uuidv7` (инициализируется в миграции `000000_create_extensions`).
+Нативная функция PostgreSQL 18 — расширений не требует. Гарантирует монотонность в рамках сессии.
 
 ### Составной PK (без суррогатного ключа)
 ```sql

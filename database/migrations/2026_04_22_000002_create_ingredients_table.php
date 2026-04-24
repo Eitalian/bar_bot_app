@@ -9,7 +9,7 @@ return new class extends Migration
     {
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE ingredients (
-                id         UUID         NOT NULL DEFAULT uuid_generate_v7(),
+                id         UUID         NOT NULL DEFAULT uuidv7(),
                 name_ru    VARCHAR(255) NULL,
                 name_en    VARCHAR(255) NULL,
                 category   VARCHAR(255) NULL,

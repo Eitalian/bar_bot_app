@@ -9,7 +9,7 @@ return new class extends Migration
     {
         DB::unprepared(/** @lang PostgreSQL */ "
             CREATE TABLE recipes (
-                id           UUID         NOT NULL DEFAULT uuid_generate_v7(),
+                id           UUID         NOT NULL DEFAULT uuidv7(),
                 name_ru      VARCHAR(255) NOT NULL,
                 name_en      VARCHAR(255) NULL,
                 description  TEXT         NULL,

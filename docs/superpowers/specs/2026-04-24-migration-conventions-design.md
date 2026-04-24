@@ -7,7 +7,9 @@
 
 ## Контекст
 
-Проект использовал Laravel Blueprint/Schema builder для миграций. Принято решение перейти на чистый PostgreSQL SQL через `DB::unprepared()`. Причина: явный контроль над DDL, использование нативных PostgreSQL-возможностей (identity columns, ENUM types, TIMESTAMPTZ, UUID v7), лучшая читаемость для разработчика, знакомого с SQL.
+Проект использовал Laravel Blueprint/Schema builder для миграций. 
+Принято решение перейти на чистый PostgreSQL SQL через `DB::unprepared()`. 
+Причина: явный контроль над DDL, использование нативных PostgreSQL-возможностей (identity columns, ENUM types, TIMESTAMPTZ, UUID v7), лучшая читаемость для разработчика, знакомого с SQL.
 
 ---
 
@@ -34,9 +36,9 @@ DB::unprepared(/** @lang PostgreSQL */ "
 - Современный SQL-стандарт (SQL:2003), заменяет устаревший `SERIAL`
 - Для явной вставки значения: `INSERT ... OVERRIDING SYSTEM VALUE VALUES (...)`
 
-**UUID v7:** `uuid_generate_v7()` через расширение `pg_uuidv7`
+**UUID v7:** `uuidv7()` через расширение `pg_uuidv7`
 - Используется когда: сущность экспортируется/импортируется (рецепты, ингредиенты)
-- Инициализация расширения в первой миграции (000000)
+- Нативная функция PostgreSQL 18, расширений не требует
 
 ---
 
@@ -104,11 +106,7 @@ DROP TYPE IF EXISTS {enum_type};
 
 ### Расширения PostgreSQL
 
-`pg_uuidv7` инициализируется в самой первой миграции проекта (или отдельной `000000_create_extensions`):
-
-```sql
-CREATE EXTENSION IF NOT EXISTS pg_uuidv7;
-```
+`uuidv7()` — нативная функция PostgreSQL 18. Расширений и инициализации не требует.
 
 ---
 
