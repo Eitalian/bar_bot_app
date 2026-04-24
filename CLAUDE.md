@@ -73,6 +73,8 @@ Run a single test: `docker compose exec app php artisan test --filter=TestName`
 
 Pint with `"preset": "per"`. Excluded: `database/`, `config/`, `bootstrap/`. Trailing commas in multiline arrays/arguments/parameters.
 
+**Конвенции миграций:** `.claude/specs/migration-conventions.md`
+
 ## Planned Features
 
 `taste_tags` column on `recipes` (JSON array) is reserved for "вкусоматика" — taste profile tagging (`sweet`, `sour`, `bitter`, `fruity`, `smoky`, `herbal`, `spicy`, `creamy`). Fill command: `bar:taste:fill` (not yet implemented).
