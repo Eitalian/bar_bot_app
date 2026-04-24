@@ -1,31 +1,37 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('recipes', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name_ru');
-            $table->string('name_en')->nullable();
-            $table->text('description')->nullable();
-            $table->text('instructions')->nullable();
-            $table->string('glass')->nullable();
-            $table->decimal('abv', 5, 2)->nullable();
-            $table->integer('volume')->nullable();
-            $table->string('icon')->nullable();
-            $table->string('photo')->nullable();
-            $table->json('taste_tags')->nullable();
-            $table->timestamps();
-        });
+        DB::unprepared(/** @lang PostgreSQL */ "
+            CREATE TABLE recipes (
+                id           UUID         NOT NULL DEFAULT uuid_generate_v7(),
+                name_ru      VARCHAR(255) NOT NULL,
+                name_en      VARCHAR(255) NULL,
+                description  TEXT         NULL,
+                instructions TEXT         NULL,
+                glass        VARCHAR(255) NULL,
+                abv          NUMERIC(5,2) NULL,
+                volume       INTEGER      NULL,
+                icon         VARCHAR(255) NULL,
+                photo        VARCHAR(255) NULL,
+                taste_tags   JSONB        NULL,
+                created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+                updated_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+                CONSTRAINT pk_recipes PRIMARY KEY (id),
+                CONSTRAINT chk_recipes_abv CHECK (abv IS NULL OR (abv >= 0.00 AND abv <= 100.00))
+            );
+        ");
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('recipes');
+        DB::unprepared(/** @lang PostgreSQL */ "
+            DROP TABLE IF EXISTS recipes;
+        ");
     }
 };

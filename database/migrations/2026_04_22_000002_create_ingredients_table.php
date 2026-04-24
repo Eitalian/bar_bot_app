@@ -1,24 +1,29 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('ingredients', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->string('name_ru')->nullable();
-            $table->string('name_en')->nullable();
-            $table->string('category')->nullable();
-            $table->timestamps();
-        });
+        DB::unprepared(/** @lang PostgreSQL */ "
+            CREATE TABLE ingredients (
+                id         UUID         NOT NULL DEFAULT uuid_generate_v7(),
+                name_ru    VARCHAR(255) NULL,
+                name_en    VARCHAR(255) NULL,
+                category   VARCHAR(255) NULL,
+                created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+                CONSTRAINT pk_ingredients PRIMARY KEY (id)
+            );
+        ");
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('ingredients');
+        DB::unprepared(/** @lang PostgreSQL */ "
+            DROP TABLE IF EXISTS ingredients;
+        ");
     }
 };
