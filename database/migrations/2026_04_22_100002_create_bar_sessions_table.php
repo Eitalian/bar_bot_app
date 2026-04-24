@@ -1,23 +1,28 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('bar_sessions', function (Blueprint $table) {
-            $table->id();
-            $table->timestamp('started_at')->useCurrent();
-            $table->timestamp('ended_at')->nullable();
-            $table->timestamps();
-        });
+        DB::unprepared(/** @lang PostgreSQL */ "
+            CREATE TABLE bar_sessions (
+                id         BIGINT      GENERATED ALWAYS AS IDENTITY,
+                started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                ended_at   TIMESTAMPTZ NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                CONSTRAINT pk_bar_sessions PRIMARY KEY (id)
+            );
+        ");
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('bar_sessions');
+        DB::unprepared(/** @lang PostgreSQL */ "
+            DROP TABLE IF EXISTS bar_sessions;
+        ");
     }
 };
