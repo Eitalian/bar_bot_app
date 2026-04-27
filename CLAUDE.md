@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Telegram-бот для управления баром: инвентарь ингредиентов, поиск коктейлей, бар-сессии, заказы от гостей барменю. Laravel 12 + Octane (RoadRunner) + Nutgram + PostgreSQL 18, Docker Compose.
 
-**Полный дизайн:** `.claude/specs/bar-bot-design.md`
+**Полный дизайн:** `.agents/specs/bar-bot-design.md`
 
 ## Commands
 
@@ -73,7 +73,7 @@ Run a single test: `docker compose exec app php artisan test --filter=TestName`
 
 Pint with `"preset": "per"`. Excluded: `database/`, `config/`, `bootstrap/`. Trailing commas in multiline arrays/arguments/parameters.
 
-**Конвенции миграций:** `.claude/specs/migration-conventions.md`
+**Конвенции миграций:** `.agents/specs/migration-conventions.md`
 
 ## Git Workflow
 

@@ -1,15 +1,16 @@
 {
-    "permissions": {
-        "allow": [
-            "Bash(git worktree *)",
-            "Bash(git checkout *)",
-            "Bash(git branch *)",
-            "Bash(git add *)",
-            "Bash(git rm *)",
-            "Bash(git commit -m ' *)",
-            "Bash(git push *)",
-            "Bash(docker compose *)",
-            "Bash(make migration-fresh *)"
-        ]
-    }
+  "permissions": {
+    "allow": [
+      "Bash(git worktree *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(docker compose *)",
+      "Bash(make migration-fresh *)",
+      "Bash(git mv *)"
+    ]
+  }
 }
