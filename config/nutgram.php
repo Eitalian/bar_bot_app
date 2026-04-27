@@ -5,7 +5,7 @@ return [
     'token' => env('TELEGRAM_TOKEN'),
 
     // if the webhook mode must validate the incoming IP range is from a telegram server
-    'safe_mode' => true,
+    'safe_mode' => env('APP_ENV', 'local') === 'production',
 
     // Extra or specific configurations
     'config' => [
@@ -13,7 +13,7 @@ return [
         'enable_http2' => true,
         'bot_name' => null,                     // нужен для группового бота
         'is_local' => true,                     // true при self-hosted Bot API
-        'test_env' => true,                    // true при тестировании Web Apps
+        'test_env' => false,                    // true при тестировании Web Apps
         'client_timeout' => 5,                  // таймаут запросов к Telegram API (сек)
         'conversation_ttl' => 43200,            // TTL conversations (сек), null = бессрочно
 
