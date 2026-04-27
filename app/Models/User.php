@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $telegram_id
  * @property string $first_name
  * @property string|null $username
+ * @property UserRole $role
  * @property \Illuminate\Support\Carbon $created_at
  */
 class User extends Model
@@ -23,11 +25,13 @@ class User extends Model
         'telegram_id',
         'first_name',
         'username',
+        'role',
     ];
 
     protected $casts = [
         'telegram_id' => 'integer',
-        'created_at' => 'datetime',
+        'created_at'  => 'datetime',
+        'role'        => UserRole::class,
     ];
 
     /** @return HasMany<Inventory, $this> */
