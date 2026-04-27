@@ -75,6 +75,25 @@ Pint with `"preset": "per"`. Excluded: `database/`, `config/`, `bootstrap/`. Tra
 
 **Конвенции миграций:** `.claude/specs/migration-conventions.md`
 
+## Git Workflow
+
+Работа ведётся в ветках, Claude создаёт PR — разработчик мержит вручную на GitHub.
+
+**Ветки:**
+- Задача: `feature/bb{N}_{slug}` — e.g. `feature/bb4_bar-session-flow`
+- Подзадача: `feature/bb{N}-s{M}_{slug}` — e.g. `feature/bb4-s1_start-conversation`
+- `slug` — kebab-case, до 4 слов
+
+**PR:**
+- Заголовок: `bb{N}: описание` или `bb{N}-s{M}: описание`
+- Тело: только `## Summary` с bullet points по сделанному
+
+**Порядок работы:**
+1. Создать ветку перед началом задачи
+2. Коммиты на ветке: `type(bb-N): description`
+3. По завершении открыть PR через `gh pr create`
+4. Мерж — вручную разработчиком
+
 ## Planned Features
 
 `taste_tags` column on `recipes` (JSON array) is reserved for "вкусоматика" — taste profile tagging (`sweet`, `sour`, `bitter`, `fruity`, `smoky`, `herbal`, `spicy`, `creamy`). Fill command: `bar:taste:fill` (not yet implemented).
