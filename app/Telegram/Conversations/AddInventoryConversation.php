@@ -9,7 +9,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class AddInventoryConversation extends Conversation
+final class AddInventoryConversation extends Conversation
 {
     protected ?string $ingredientId = null;
 

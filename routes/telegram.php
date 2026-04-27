@@ -6,6 +6,7 @@ use App\Actions\Inventory\InventoryAction;
 use App\Actions\Inventory\RemoveInventoryAction;
 use App\Telegram\Conversations\AddInventoryConversation;
 use App\Telegram\Handlers\StartHandler;
+use App\Telegram\Middleware\AuthenticateTelegramUser;
 use SergiX44\Nutgram\Nutgram;
 
 /*
@@ -13,6 +14,8 @@ use SergiX44\Nutgram\Nutgram;
 | Nutgram Handlers
 |--------------------------------------------------------------------------
 */
+
+$bot->middleware(AuthenticateTelegramUser::class);
 
 $bot->onCommand('start', StartHandler::class)->description('Главное меню');
 $bot->onCommand('inventory', [InventoryAction::class, 'fromTelegram'])->description('Инвентарь бара');

@@ -13,21 +13,17 @@ class Inventory extends Model
     protected $table = 'bar_inventory';
 
     protected $fillable = [
-        'user_id',
         'ingredient_id',
         'quantity',
         'unit',
     ];
 
+    /** @var array<string, string> */
     protected $casts = [
         'quantity' => 'float',
     ];
 
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
+    /** @return BelongsTo<Ingredient, self> */
     public function ingredient(): BelongsTo
     {
         return $this->belongsTo(Ingredient::class);

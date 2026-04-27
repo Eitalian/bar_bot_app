@@ -211,6 +211,18 @@ $bot->onPhoto([UploadPhotoAction::class, 'fromTelegram']);
 - `POST /api/inventory` — добавить
 - `DELETE /api/inventory/{id}` — удалить
 
+### Фаза 1.1 — Роли и контроль доступа (bb5-s1)
+
+Введение ролей пользователей и ограничение действий по роли.
+
+**Роли:** `guest`, `bartender`, `owner`
+
+**Telegram/HTTP:**
+- Только `bartender`/`owner` могут добавлять и удалять из инвентаря
+- Гости могут только просматривать инвентарь
+- Миграция: добавить колонку `role` в таблицу `users`
+- Логика доступа через middleware или Policy
+
 ---
 
 ### Фаза 2 — Поиск рецептов

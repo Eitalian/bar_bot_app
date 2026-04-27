@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use SergiX44\Nutgram\Nutgram;
 
-class TelegramUserResolver
+final class TelegramUserResolver
 {
     public function resolve(Nutgram $bot): User
     {
