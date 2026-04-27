@@ -42,6 +42,12 @@ final class AddInventoryAction
 
         $bot->sendMessage("✅ Добавлено: {$item->ingredient->name_ru}");
 
-        (new InventoryListResponse($this->listHandler->handle()))->send($bot);
+        $response = new InventoryListResponse($this->listHandler->handle());
+
+        $bot->sendMessage(
+            text: $response->text(),
+            parse_mode: 'Markdown',
+            reply_markup: $response->keyboard(),
+        );
     }
 }

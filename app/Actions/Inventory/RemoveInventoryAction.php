@@ -30,6 +30,12 @@ final class RemoveInventoryAction
         $bot->answerCallbackQuery();
         $bot->sendMessage('✅ Удалено из инвентаря');
 
-        (new InventoryListResponse($this->listHandler->handle()))->send($bot);
+        $response = new InventoryListResponse($this->listHandler->handle());
+
+        $bot->sendMessage(
+            text: $response->text(),
+            parse_mode: 'Markdown',
+            reply_markup: $response->keyboard(),
+        );
     }
 }

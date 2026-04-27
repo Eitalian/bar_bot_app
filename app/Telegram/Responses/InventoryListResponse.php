@@ -4,7 +4,6 @@ namespace App\Telegram\Responses;
 
 use App\Models\Inventory;
 use Illuminate\Database\Eloquent\Collection;
-use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
@@ -13,16 +12,7 @@ final class InventoryListResponse
     /** @param Collection<int, Inventory> $items */
     public function __construct(private Collection $items) {}
 
-    public function send(Nutgram $bot): void
-    {
-        $bot->sendMessage(
-            text: $this->text(),
-            parse_mode: 'Markdown',
-            reply_markup: $this->keyboard(),
-        );
-    }
-
-    private function text(): string
+    public function text(): string
     {
         if ($this->items->isEmpty()) {
             return '📦 *Инвентарь пуст.*';
@@ -33,7 +23,7 @@ final class InventoryListResponse
         return "📦 *Инвентарь бара* — {$count} {$this->pluralize($count)}:";
     }
 
-    private function keyboard(): InlineKeyboardMarkup
+    public function keyboard(): InlineKeyboardMarkup
     {
         $keyboard = InlineKeyboardMarkup::make();
 

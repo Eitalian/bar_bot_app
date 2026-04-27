@@ -22,7 +22,12 @@ final class InventoryAction
     public function fromTelegram(Nutgram $bot): void
     {
         $items = $this->handler->handle();
+        $response = new InventoryListResponse($items);
 
-        (new InventoryListResponse($items))->send($bot);
+        $bot->sendMessage(
+            text: $response->text(),
+            parse_mode: 'Markdown',
+            reply_markup: $response->keyboard(),
+        );
     }
 }
