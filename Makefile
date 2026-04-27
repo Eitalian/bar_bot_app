@@ -31,6 +31,9 @@ bot-run:
 bot-list:
 	${ARTISAN} nutgram:list
 
+bot-register-commands:
+	${ARTISAN} nutgram:register-commands
+
 bot-hook-info:
 	${ARTISAN} nutgram:hook:info
 
@@ -70,15 +73,10 @@ ide-helper:
 	${ARTISAN} ide-helper:meta
 
 cache-clear:
-	${ARTISAN} config:clear
-	${ARTISAN} cache:clear
-	${ARTISAN} route:clear
-	${ARTISAN} view:clear
+	${ARTISAN} optimize:clear
 
 cache-warm:
-	${ARTISAN} config:cache
-	${ARTISAN} route:cache
-	${ARTISAN} view:cache
+	${ARTISAN} optimize
 
 routes-list:
 	${ARTISAN} route:list
