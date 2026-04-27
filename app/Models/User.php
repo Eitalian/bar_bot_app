@@ -41,4 +41,14 @@ class User extends Model implements Authenticatable
     {
         return $this->hasMany(Inventory::class);
     }
+
+    public function getAuthPassword(): string
+    {
+        return '';
+    }
+
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
 }
