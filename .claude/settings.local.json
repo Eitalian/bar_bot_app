@@ -10,7 +10,12 @@
       "Bash(git push *)",
       "Bash(docker compose *)",
       "Bash(make migration-fresh *)",
-      "Bash(git mv *)"
+      "Bash(git mv *)",
+      "Bash(make pint-dirty-dry *)",
+      "Bash(gh pr *)",
+      "Bash(git remote *)",
+      "PowerShell(gh pr *)",
+      "Bash(gh api *)"
     ]
   }
 }

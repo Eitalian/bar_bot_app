@@ -19,7 +19,7 @@ class StartHandler
             )
             ->addRow(
                 InlineKeyboardButton::make('🎛 Фильтры', callback_data: 'cmd:filter'),
-                InlineKeyboardButton::make('❓ Помощь', callback_data: 'cmd:help'),
+                InlineKeyboardButton::make('📦 Инвентарь', callback_data: 'inventory:show'),
             );
 
         $bot->sendMessage(
