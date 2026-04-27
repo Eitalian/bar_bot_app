@@ -10,7 +10,7 @@ enum UserRole: string
 
     public function canManage(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::Bartender, self::Owner => true,
             self::Guest                  => false,
         };
