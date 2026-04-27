@@ -6,8 +6,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
-        "laravel/framework": "^12.0",
-        "laravel/tinker": "^2.10.1",
+        "laravel/framework": "^13.0",
+        "laravel/tinker": "^3.0",
         "laravel/octane": "^2.5",
         "nutgram/laravel": "^1.6",
         "spatie/laravel-data": "^4.0",
@@ -59,7 +59,7 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
-            "@php nutgram:ide:generate"
+            "@php artisan nutgram:ide:generate"
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"

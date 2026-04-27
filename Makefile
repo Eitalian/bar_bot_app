@@ -22,8 +22,11 @@ cmn-pint-dirty:
 	${CONTAINER} php ./vendor/bin/pint --dirty
 
 # ── Bot ───────────────────────────────────────────────────────────────────────
-bot-start:
+bot-listen:
 	${ARTISAN} nutgram:listen
+
+bot-run:
+	${ARTISAN} nutgram:run
 
 bot-list:
 	${ARTISAN} nutgram:list
