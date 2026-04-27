@@ -14,10 +14,14 @@ use SergiX44\Nutgram\Nutgram;
 
 $bot->middleware(AuthenticateTelegramUser::class);
 
+// Note: all protected routes in the group below are callback queries;
+// answerCallbackQuery is therefore always valid in these handlers.
+// AuthorizationException: authenticated user lacks required role
 $bot->onException(AuthorizationException::class, function (Nutgram $bot): void {
     $bot->answerCallbackQuery(text: '🚫 Нет доступа', show_alert: true);
 });
 
+// AuthenticationException: safety net for update types where userId() is null
 $bot->onException(AuthenticationException::class, function (Nutgram $bot): void {
     $bot->answerCallbackQuery(text: '🚫 Нет доступа', show_alert: true);
 });
