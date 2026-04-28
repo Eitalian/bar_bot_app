@@ -6,12 +6,11 @@ use App\Models\User;
 
 it('GET /api/inventory returns all items', function () {
     Inventory::factory()->count(3)->create();
-
     $user = User::factory()->create();
 
-    $response = $this->getJson("/api/inventory?telegram_id={$user->telegram_id}");
-
-    $response->assertOk()->assertJsonCount(3);
+    $this->getJson("/api/inventory?telegram_id={$user->telegram_id}")
+        ->assertOk()
+        ->assertJsonCount(3);
 });
 
 it('GET /api/inventory returns 404 for unknown telegram_id', function () {
@@ -19,22 +18,31 @@ it('GET /api/inventory returns 404 for unknown telegram_id', function () {
 });
 
 it('POST /api/inventory creates an inventory item', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->bartender()->create();
     $ingredient = Ingredient::factory()->create();
 
-    $response = $this->postJson('/api/inventory', [
-        'telegram_id' => $user->telegram_id,
+    $this->postJson('/api/inventory', [
+        'telegram_id'   => $user->telegram_id,
         'ingredient_id' => $ingredient->id,
-        'quantity' => 500,
-        'unit' => 'мл',
-    ]);
+        'quantity'      => 500,
+        'unit'          => 'мл',
+    ])->assertCreated();
 
-    $response->assertCreated();
     $this->assertDatabaseHas('bar_inventory', ['ingredient_id' => $ingredient->id, 'quantity' => 500]);
 });
 
-it('DELETE /api/inventory/{id} removes the item', function () {
+it('POST /api/inventory returns 403 for guest', function () {
     $user = User::factory()->create();
+    $ingredient = Ingredient::factory()->create();
+
+    $this->postJson('/api/inventory', [
+        'telegram_id'   => $user->telegram_id,
+        'ingredient_id' => $ingredient->id,
+    ])->assertForbidden();
+});
+
+it('DELETE /api/inventory/{id} removes the item', function () {
+    $user = User::factory()->bartender()->create();
     $item = Inventory::factory()->create();
 
     $this->deleteJson("/api/inventory/{$item->id}?telegram_id={$user->telegram_id}")
@@ -43,8 +51,16 @@ it('DELETE /api/inventory/{id} removes the item', function () {
     $this->assertDatabaseMissing('bar_inventory', ['id' => $item->id]);
 });
 
-it('DELETE /api/inventory/{id} returns 404 for missing item', function () {
+it('DELETE /api/inventory/{id} returns 403 for guest', function () {
     $user = User::factory()->create();
+    $item = Inventory::factory()->create();
+
+    $this->deleteJson("/api/inventory/{$item->id}?telegram_id={$user->telegram_id}")
+        ->assertForbidden();
+});
+
+it('DELETE /api/inventory/{id} returns 404 for missing item', function () {
+    $user = User::factory()->bartender()->create();
 
     $this->deleteJson("/api/inventory/999?telegram_id={$user->telegram_id}")
         ->assertNotFound();
