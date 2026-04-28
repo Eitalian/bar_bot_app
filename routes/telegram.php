@@ -16,15 +16,11 @@ $bot->middleware(AuthenticateTelegramUser::class);
 
 // Note: all protected routes in the group below are callback queries;
 // answerCallbackQuery is therefore always valid in these handlers.
+$accessDenied = fn (Nutgram $bot) => $bot->answerCallbackQuery(text: '🚫 Нет доступа', show_alert: true);
 // AuthorizationException: authenticated user lacks required role
-$bot->onException(AuthorizationException::class, function (Nutgram $bot): void {
-    $bot->answerCallbackQuery(text: '🚫 Нет доступа', show_alert: true);
-});
-
+$bot->onException(AuthorizationException::class, $accessDenied);
 // AuthenticationException: safety net for update types where userId() is null
-$bot->onException(AuthenticationException::class, function (Nutgram $bot): void {
-    $bot->answerCallbackQuery(text: '🚫 Нет доступа', show_alert: true);
-});
+$bot->onException(AuthenticationException::class, $accessDenied);
 
 $bot->onCommand('start', StartHandler::class)->description('Главное меню');
 $bot->onCommand('inventory', [InventoryAction::class, 'fromTelegram'])->description('Инвентарь бара');
