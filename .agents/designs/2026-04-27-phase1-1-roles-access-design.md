@@ -60,7 +60,6 @@ enum UserRole: string
 
 - Добавить `role` в `$fillable`
 - Добавить cast: `'role' => UserRole::class`
-- Добавить метод: `canManageInventory(): bool` → `$this->role->canManage()`
 - Добавить `UserRole` в аннотацию `@property`
 
 ---
@@ -91,7 +90,7 @@ final class CanManageMiddleware
         return $next($request);
     }
 
-    // Nutgram bot pipeline (метод уточнить по исходникам Nutgram)
+    // Nutgram bot pipeline 
     public function __invoke(Nutgram $bot, callable $next): void
     {
         Gate::authorize('can-manage');
@@ -99,8 +98,6 @@ final class CanManageMiddleware
     }
 }
 ```
-
-> **Примечание:** Точный интерфейс Nutgram middleware (метод `__invoke` vs другой) требует верификации по исходникам `vendor/nutgram/nutgram/src/`.
 
 ### HTTP Routes
 
