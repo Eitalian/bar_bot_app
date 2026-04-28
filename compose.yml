@@ -10,8 +10,7 @@ services:
     volumes:
       - .:/var/www
       - ./data:/var/www/data
-    command: |
-      sh -c "php artisan octane:start --server=roadrunner --host=0.0.0.0 --port=8080 --watch"
+    command: supervisord -c /var/www/docker/supervisord.conf
     depends_on:
       postgres:
         condition: service_healthy
