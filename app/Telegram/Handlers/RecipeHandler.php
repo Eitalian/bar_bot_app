@@ -2,16 +2,18 @@
 
 namespace App\Telegram\Handlers;
 
-use App\Models\Recipe;
+use App\Handlers\Search\GetRecipeHandler;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 class RecipeHandler
 {
+    public function __construct(private GetRecipeHandler $handler) {}
+
     public function __invoke(Nutgram $bot, string $id): void
     {
-        $recipe = Recipe::with('recipeIngredients', 'tags')->find($id);
+        $recipe = $this->handler->handle($id);
 
         if (! $recipe) {
             $bot->answerCallbackQuery(text: 'Рецепт не найден 😔');
@@ -21,7 +23,7 @@ class RecipeHandler
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
-                InlineKeyboardButton::make('🔙 Назад', callback_data: 'search:back'),
+                InlineKeyboardButton::make('🔙 К поиску', callback_data: 'browse:back'),
             );
 
         $bot->editMessageText(
