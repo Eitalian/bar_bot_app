@@ -4,10 +4,12 @@ use App\Actions\Inventory\AddInventoryAction;
 use App\Actions\Inventory\InventoryAction;
 use App\Actions\Inventory\RemoveInventoryAction;
 use App\Actions\Search\GetRecipeAction;
+use App\Actions\Search\SearchRecipesAction;
 use App\Middleware\CanManageMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recipes')->group(function () {
+    Route::get('/', SearchRecipesAction::class);
     Route::get('/{id}', GetRecipeAction::class);
 });
 
