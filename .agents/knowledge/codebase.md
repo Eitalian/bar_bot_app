@@ -326,7 +326,7 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 
 ## Известные особенности и ограничения
 
-1. **`search:back` callback** (в RecipeHandler) — кнопка «🔙 Назад» отправляет `callback_data: 'search:back'`. Маршрут **не зарегистрирован**. Nutgram игнорирует необработанные callback queries (не крашится). Исправить в Phase 2 или добавить noop-обработчик.
+1. **`browse:back` callback** (в RecipeHandler) — кнопка «🔙 К поиску» отправляет `callback_data: 'browse:back'`. Маршрут будет зарегистрирован в Task 6 Phase 2. До тех пор Nutgram игнорирует необработанные callback queries (не крашится).
 
 2. **`ing:add:{id}` callbacks** (SearchByIngredientConversation) — когда найдено несколько ингредиентов, conversation показывает кнопки с `ing:add:{id}`. Шаг `handleIngredient` читает `$bot->message()->text`, а не callback_data — при нажатии кнопки `text` будет `null`, поиск выполнится по пустой строке. Известный баг, не мешает основному флоу.
 
