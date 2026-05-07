@@ -8,6 +8,10 @@ Telegram-бот для управления баром: инвентарь ин�
 
 **Полный дизайн:** `.agents/specs/bar-bot-design.md`
 
+**Знания о кодовой базе (статус фаз, паттерны с примерами, известные особенности):** `.agents/knowledge/codebase.md` — читай перед началом задачи, обновляй по завершении.
+
+**Планы разработки:** `.agents/plans/`
+
 ## Commands
 
 All commands run inside Docker via Makefile targets. Direct artisan calls: `docker compose exec app php artisan <cmd>`.
