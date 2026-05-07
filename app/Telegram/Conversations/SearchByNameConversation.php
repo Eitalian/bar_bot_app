@@ -16,8 +16,6 @@ class SearchByNameConversation extends Conversation
 
     protected ?string $query = null;
 
-    protected int $page = 1;
-
     public function start(Nutgram $bot): void
     {
         $bot->sendMessage('🔍 Введите название коктейля (или его часть):');
@@ -35,7 +33,6 @@ class SearchByNameConversation extends Conversation
             return;
         }
 
-        $this->page = 1;
         $this->showResults($bot);
         $this->end();
     }
@@ -44,7 +41,6 @@ class SearchByNameConversation extends Conversation
     {
         $data = new SearchRecipesData(
             q: $this->query,
-            page: $this->page,
             perPage: self::PER_PAGE,
         );
 
@@ -62,7 +58,7 @@ class SearchByNameConversation extends Conversation
         $browseKey = app(BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
 
         $text = "🔍 Результаты поиска: *\"{$this->query}\"*\n";
-        $text .= "Найдено: {$results->total()} | Страница {$this->page}/{$results->lastPage()}\n\n";
+        $text .= "Найдено: {$results->total()} рецептов\n\n";
 
         $keyboard = InlineKeyboardMarkup::make();
 

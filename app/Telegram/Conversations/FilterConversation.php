@@ -2,6 +2,9 @@
 
 namespace App\Telegram\Conversations;
 
+use App\Data\Search\SearchRecipesData;
+use App\Handlers\Search\SearchRecipesHandler;
+use App\Services\BrowseContext;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -201,7 +204,7 @@ class FilterConversation extends Conversation
 
     private function showResults(Nutgram $bot): void
     {
-        $data = new \App\Data\Search\SearchRecipesData(
+        $data = new SearchRecipesData(
             glass: $this->glass,
             abvMin: $this->abvMin,
             abvMax: $this->abvMax,
@@ -211,7 +214,7 @@ class FilterConversation extends Conversation
             perPage: 15,
         );
 
-        $results = app(\App\Handlers\Search\SearchRecipesHandler::class)->handle($data);
+        $results = app(SearchRecipesHandler::class)->handle($data);
 
         if ($results->isEmpty()) {
             $bot->sendMessage('😔 По выбранным фильтрам ничего не найдено. Попробуйте другие параметры.');
@@ -219,7 +222,7 @@ class FilterConversation extends Conversation
             return;
         }
 
-        $browseKey = app(\App\Services\BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
+        $browseKey = app(BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
 
         $text = "🎛 *Результаты фильтрации:*\nНайдено: {$results->total()} рецептов\n\n";
         $keyboard = InlineKeyboardMarkup::make();
