@@ -13,13 +13,14 @@ final class SearchByIngredientHandler
     public function handle(SearchByIngredientData $data): Collection
     {
         if (empty($data->ingredientIds)) {
-            return Recipe::whereRaw('false')->get();
+            return new Collection();
         }
 
-        $count = count($data->ingredientIds);
+        $ingredientIds = array_unique($data->ingredientIds);
+        $count = count($ingredientIds);
 
         $recipeIds = DB::table('recipe_ingredients')
-            ->whereIn('ingredient_id', $data->ingredientIds)
+            ->whereIn('ingredient_id', $ingredientIds)
             ->groupBy('recipe_id')
             ->havingRaw('COUNT(DISTINCT ingredient_id) = ?', [$count])
             ->pluck('recipe_id');
