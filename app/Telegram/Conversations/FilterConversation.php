@@ -2,7 +2,6 @@
 
 namespace App\Telegram\Conversations;
 
-use App\Models\Recipe;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -202,43 +201,38 @@ class FilterConversation extends Conversation
 
     private function showResults(Nutgram $bot): void
     {
-        $query = Recipe::query();
+        $data = new \App\Data\Search\SearchRecipesData(
+            glass: $this->glass,
+            abvMin: $this->abvMin,
+            abvMax: $this->abvMax,
+            volMin: $this->volMin,
+            volMax: $this->volMax,
+            tag: $this->tag,
+            perPage: 15,
+        );
 
-        if ($this->abvMin !== null && $this->abvMax === 0.0) {
-            $query->where('abv', 0);
-        } elseif ($this->abvMin !== null) {
-            $query->whereBetween('abv', [$this->abvMin, $this->abvMax]);
-        }
+        $results = app(\App\Handlers\Search\SearchRecipesHandler::class)->handle($data);
 
-        if ($this->volMin !== null) {
-            $query->whereBetween('volume', [$this->volMin, $this->volMax]);
-        }
-
-        if ($this->glass) {
-            $query->where('glass', $this->glass);
-        }
-
-        if ($this->tag) {
-            $query->whereHas('tags', fn($q) => $q->where('tag', $this->tag));
-        }
-
-        $recipes = $query->orderBy('name_ru')->take(15)->get();
-
-        if ($recipes->isEmpty()) {
+        if ($results->isEmpty()) {
             $bot->sendMessage('😔 По выбранным фильтрам ничего не найдено. Попробуйте другие параметры.');
 
             return;
         }
 
-        $text = "🎛 *Результаты фильтрации:*\nНайдено: {$recipes->count()} рецептов\n\n";
+        $browseKey = app(\App\Services\BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
+
+        $text = "🎛 *Результаты фильтрации:*\nНайдено: {$results->total()} рецептов\n\n";
         $keyboard = InlineKeyboardMarkup::make();
 
-        foreach ($recipes as $recipe) {
+        foreach ($results->values() as $pos => $recipe) {
             $abv = $recipe->abv ? " {$recipe->abv}%" : '';
             $vol = $recipe->volume ? " {$recipe->volume}мл" : '';
             $text .= "• {$recipe->name_ru}{$abv}{$vol}\n";
             $keyboard->addRow(
-                InlineKeyboardButton::make("🍹 {$recipe->name_ru}", callback_data: "recipe:show:{$recipe->id}"),
+                InlineKeyboardButton::make(
+                    "🍹 {$recipe->name_ru}",
+                    callback_data: "recipe:browse:{$browseKey}:{$pos}",
+                ),
             );
         }
 
