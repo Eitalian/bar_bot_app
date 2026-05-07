@@ -19,13 +19,11 @@ final class SearchRecipesHandler
             });
         }
 
-        if ($data->glass !== null) {
+        if ($data->glass !== null && $data->glass !== '') {
             $query->where('glass', $data->glass);
         }
 
-        if ($data->abvMin !== null && $data->abvMax === 0.0) {
-            $query->where('abv', 0);
-        } elseif ($data->abvMin !== null && $data->abvMax !== null) {
+        if ($data->abvMin !== null && $data->abvMax !== null) {
             $query->whereBetween('abv', [$data->abvMin, $data->abvMax]);
         }
 
@@ -33,7 +31,7 @@ final class SearchRecipesHandler
             $query->whereBetween('volume', [$data->volMin, $data->volMax]);
         }
 
-        if ($data->tag !== null) {
+        if ($data->tag !== null && $data->tag !== '') {
             $query->whereHas('tags', fn ($q) => $q->where('tag', $data->tag));
         }
 
