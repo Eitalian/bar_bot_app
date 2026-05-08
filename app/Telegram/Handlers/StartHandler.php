@@ -6,7 +6,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class StartHandler
+final class StartHandler
 {
     public function __invoke(Nutgram $bot): void
     {

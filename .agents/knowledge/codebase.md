@@ -1,7 +1,11 @@
 # Codebase Knowledge Base
 
 > **Для агентов:** Прочитай этот файл **перед началом** любой задачи разработки.
-> После завершения работы **обнови** этот файл: добавь новые паттерны, статусы реализации, известные особенности.
+>
+> **Кто обновляет:** только агент финальной задачи фазы, когда в плане явно указан шаг `Обновить codebase.md`.
+> Промежуточные субагенты файл **не трогают** — находки передают текстом в отчёте.
+>
+> **Что писать:** новые паттерны, статусы реализации, известные особенности.
 > Не дублируй то, что уже есть в `CLAUDE.md` — только операционные знания, примеры кода, статус фаз.
 
 ---
@@ -12,7 +16,7 @@
 |---|---|---|
 | 1 | Инвентарь ингредиентов (Telegram + HTTP API) | ✅ Готово |
 | 1.1 | Роли и контроль доступа (guest/bartender/owner) | ✅ Готово |
-| 2 | Поиск рецептов (Telegram + HTTP API) | 🔄 В разработке |
+| 2 | Поиск рецептов (Telegram + HTTP API) | ✅ Готово |
 | 3 | Бар-сессии | ⏳ Не начато |
 | 3.1 | Заказы коктейлей | ⏳ Не начато |
 | 4 | Избранное и оценки | ⏳ Не начато |
@@ -164,11 +168,13 @@ Group [CanManageMiddleware]:
 
 onCallbackQueryData('noop')         → answerCallbackQuery (no-op)
 
-// Phase 2 (активируются в Task 5):
-onCallbackQueryData('cmd:search')      → SearchByNameConversation::begin
-onCallbackQueryData('cmd:ingredients') → SearchByIngredientConversation::begin
-onCallbackQueryData('cmd:filter')      → FilterConversation::begin
-onCallbackQueryData('recipe:show:{id}') → RecipeHandler
+// Phase 2 (активны):
+onCallbackQueryData('cmd:search')         → SearchByNameConversation::begin
+onCallbackQueryData('cmd:ingredients')    → SearchByIngredientConversation::begin
+onCallbackQueryData('cmd:filter')         → FilterConversation::begin
+onCallbackQueryData('recipe:browse:{browseKey}:{pos}') → RecipeBrowseHandler
+onCallbackQueryData('recipe:show:{id}')   → RecipeHandler
+onCallbackQueryData('browse:back')        → StartHandler
 ```
 
 ### Кнопки главного меню (StartHandler)
@@ -191,7 +197,6 @@ GET    /api/inventory              → InventoryAction
 POST   /api/inventory              → AddInventoryAction     [+CanManageMiddleware]
 DELETE /api/inventory/{id}         → RemoveInventoryAction  [+CanManageMiddleware]
 
-// Phase 2 (добавляются в Task 6-7):
 GET    /api/recipes                → SearchRecipesAction    (без auth)
 GET    /api/recipes/{id}           → GetRecipeAction        (без auth)
 ```
@@ -326,7 +331,7 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 
 ## Известные особенности и ограничения
 
-1. **`search:back` callback** (в RecipeHandler) — кнопка «🔙 Назад» отправляет `callback_data: 'search:back'`. Маршрут **не зарегистрирован**. Nutgram игнорирует необработанные callback queries (не крашится). Исправить в Phase 2 или добавить noop-обработчик.
+1. **`browse:back` callback** (в RecipeHandler) — кнопка «🔙 К поиску» отправляет `callback_data: 'browse:back'`. Маршрут будет зарегистрирован в Task 6 Phase 2. До тех пор Nutgram игнорирует необработанные callback queries (не крашится).
 
 2. **`ing:add:{id}` callbacks** (SearchByIngredientConversation) — когда найдено несколько ингредиентов, conversation показывает кнопки с `ing:add:{id}`. Шаг `handleIngredient` читает `$bot->message()->text`, а не callback_data — при нажатии кнопки `text` будет `null`, поиск выполнится по пустой строке. Известный баг, не мешает основному флоу.
 
@@ -337,3 +342,25 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 5. **`taste_tags`** — зарезервированная колонка (JSON array). Команда `bar:taste:fill` не реализована.
 
 6. **`Recipe` без `user_id`** — встроенные рецепты не принадлежат пользователям. `user_id` появится в Phase 6 (форк).
+
+---
+
+## BrowseContext (app/Services/BrowseContext.php)
+
+Хранит список UUID рецептов в Laravel Cache под ключом `browse:{telegramId}`. TTL = 30 минут. Один активный browse на пользователя — новый поиск перезаписывает предыдущий.
+
+```php
+$key = (new BrowseContext)->store(['uuid-1', 'uuid-2'], $telegramId); // returns string telegramId
+$ids = (new BrowseContext)->get($key); // string[]|null
+```
+
+Кэш-ключ формата `browse:{telegramId}`, метод `get()` принимает строку `telegramId` без префикса.
+
+## RecipeBrowseHandler (app/Telegram/Handlers/RecipeBrowseHandler.php)
+
+Инлайн-обработчик для навигации по результатам поиска. Маршрут: `recipe:browse:{browseKey}:{pos}`.
+
+- Читает список IDs из BrowseContext по `browseKey`
+- Показывает рецепт по позиции через `GetRecipeHandler`
+- Строит клавиатуру с кнопками «◀️ Пред.» / «▶️ След.» (если позиция не крайняя), «🔙 К поиску» (browse:back), «🛒 Заказать» / «🍴 Форкнуть» (noop)
+- При просроченном контексте или несуществующем рецепте — `answerCallbackQuery` с текстом ошибки

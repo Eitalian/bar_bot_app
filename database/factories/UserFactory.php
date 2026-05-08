@@ -6,7 +6,7 @@ use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class UserFactory extends Factory
+final class UserFactory extends Factory
 {
     protected $model = User::class;
 
