@@ -10,7 +10,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class SearchByNameConversation extends Conversation
+final class SearchByNameConversation extends Conversation
 {
     protected const PER_PAGE = 5;
 

@@ -4,7 +4,7 @@ use App\Services\BrowseContext;
 use Illuminate\Support\Facades\Cache;
 
 it('stores recipe ids under telegram_id key', function () {
-    $key = (new BrowseContext())->store(['uuid-1', 'uuid-2', 'uuid-3'], 123456789);
+    $key = new BrowseContext()->store(['uuid-1', 'uuid-2', 'uuid-3'], 123456789);
 
     expect($key)->toBe('123456789')
         ->and(Cache::has('browse:123456789'))->toBeTrue();
@@ -20,7 +20,7 @@ it('retrieves stored ids by telegram_id key', function () {
 });
 
 it('returns null for non-existent key', function () {
-    expect((new BrowseContext())->get('nonexist'))->toBeNull();
+    expect(new BrowseContext()->get('nonexist'))->toBeNull();
 });
 
 it('overwrites previous context for same user', function () {

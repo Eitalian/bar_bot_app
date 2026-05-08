@@ -6,7 +6,7 @@ use App\Models\Ingredient;
 use App\Models\Inventory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class InventoryFactory extends Factory
+final class InventoryFactory extends Factory
 {
     protected $model = Inventory::class;
 

@@ -10,7 +10,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class FilterConversation extends Conversation
+final class FilterConversation extends Conversation
 {
     protected ?float $abvMin = null;
 
@@ -105,7 +105,7 @@ class FilterConversation extends Conversation
             )
             ->addRow(
                 InlineKeyboardButton::make('120–200мл', callback_data: 'filter:vol:120:200'),
-                InlineKeyboardButton::make('200мл+ (лонги)', callback_data: 'filter:vol:200:9999'),
+                InlineKeyboardButton::make('200мл+ (лонги)', callback_data: 'filter:vol:200:500'),
             );
 
         $bot->sendMessage(text: '📏 Выберите объём:', reply_markup: $keyboard);
@@ -211,7 +211,7 @@ class FilterConversation extends Conversation
             volMin: $this->volMin,
             volMax: $this->volMax,
             tag: $this->tag,
-            perPage: 15,
+            perPage: config('bar.search.per_page'),
         );
 
         $results = app(SearchRecipesHandler::class)->handle($data);

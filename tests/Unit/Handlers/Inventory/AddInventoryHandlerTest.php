@@ -14,7 +14,7 @@ it('creates a new inventory item', function () {
         unit: 'мл',
     );
 
-    $item = (new AddInventoryHandler)->handle($data);
+    $item = new AddInventoryHandler()->handle($data);
 
     expect($item->ingredient_id)->toBe($ingredient->id)
         ->and($item->quantity)->toBe(500.0)
@@ -33,7 +33,7 @@ it('updates existing item for the same ingredient', function () {
 
     $data = new AddInventoryData(ingredientId: $ingredient->id, quantity: 750.0, unit: 'мл');
 
-    (new AddInventoryHandler)->handle($data);
+    new AddInventoryHandler()->handle($data);
 
     expect(Inventory::count())->toBe(1);
     $this->assertDatabaseHas('bar_inventory', ['ingredient_id' => $ingredient->id, 'quantity' => 750.0]);
@@ -42,7 +42,7 @@ it('updates existing item for the same ingredient', function () {
 it('saves item without quantity', function () {
     $ingredient = Ingredient::factory()->create();
 
-    $item = (new AddInventoryHandler)->handle(
+    $item = new AddInventoryHandler()->handle(
         new AddInventoryData(ingredientId: $ingredient->id, quantity: null, unit: null),
     );
 

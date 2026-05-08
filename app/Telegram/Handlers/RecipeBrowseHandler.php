@@ -8,16 +8,15 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class RecipeBrowseHandler
+final class RecipeBrowseHandler
 {
     public function __construct(
         private GetRecipeHandler $recipeHandler,
         private BrowseContext $browseContext,
     ) {}
 
-    public function __invoke(Nutgram $bot, string $browseKey, string $pos): void
+    public function __invoke(Nutgram $bot, string $browseKey, int $pos): void
     {
-        $position = (int) $pos;
         $ids = $this->browseContext->get($browseKey);
 
         if ($ids === null) {
@@ -26,7 +25,7 @@ class RecipeBrowseHandler
             return;
         }
 
-        $id = $ids[$position] ?? null;
+        $id = $ids[$pos] ?? null;
 
         if ($id === null) {
             $bot->answerCallbackQuery(text: 'Рецепт не найден 😔');
@@ -45,16 +44,16 @@ class RecipeBrowseHandler
         $keyboard = InlineKeyboardMarkup::make();
 
         $nav = [];
-        if ($position > 0) {
+        if ($pos > 0) {
             $nav[] = InlineKeyboardButton::make(
                 '◀️ Пред.',
-                callback_data: "recipe:browse:{$browseKey}:" . ($position - 1),
+                callback_data: "recipe:browse:{$browseKey}:" . ($pos - 1),
             );
         }
-        if ($position < count($ids) - 1) {
+        if ($pos < count($ids) - 1) {
             $nav[] = InlineKeyboardButton::make(
                 '▶️ След.',
-                callback_data: "recipe:browse:{$browseKey}:" . ($position + 1),
+                callback_data: "recipe:browse:{$browseKey}:" . ($pos + 1),
             );
         }
         if (! empty($nav)) {

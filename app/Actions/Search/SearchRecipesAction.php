@@ -20,7 +20,7 @@ final class SearchRecipesAction
             abvMax: $request->filled('abv_max') ? (float) $request->input('abv_max') : null,
             tag: $request->string('tags')->value() ?: null,
             page: (int) $request->input('page', 1),
-            perPage: (int) $request->input('per_page', 15),
+            perPage: (int) $request->input('per_page', config('bar.search.per_page')),
         );
 
         return response()->json($this->handler->handle($data));

@@ -7,7 +7,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class RecipeHandler
+final class RecipeHandler
 {
     public function __construct(private GetRecipeHandler $handler) {}
 

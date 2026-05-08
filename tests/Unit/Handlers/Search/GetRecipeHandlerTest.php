@@ -11,7 +11,7 @@ it('returns recipe with recipeIngredients eager-loaded', function () {
     $ing = Ingredient::factory()->create();
     RecipeIngredient::create(['recipe_id' => $recipe->id, 'ingredient_id' => $ing->id, 'sort_order' => 1]);
 
-    $result = (new GetRecipeHandler)->handle($recipe->id);
+    $result = new GetRecipeHandler()->handle($recipe->id);
 
     expect($result)->not->toBeNull()
         ->and($result->relationLoaded('recipeIngredients'))->toBeTrue()
@@ -22,14 +22,14 @@ it('returns recipe with tags eager-loaded', function () {
     $recipe = Recipe::factory()->create();
     RecipeTag::create(['recipe_id' => $recipe->id, 'tag' => 'long']);
 
-    $result = (new GetRecipeHandler)->handle($recipe->id);
+    $result = new GetRecipeHandler()->handle($recipe->id);
 
     expect($result->relationLoaded('tags'))->toBeTrue()
         ->and($result->tags)->toHaveCount(1);
 });
 
 it('returns null for non-existent id', function () {
-    $result = (new GetRecipeHandler)->handle('00000000-0000-0000-0000-000000000000');
+    $result = new GetRecipeHandler()->handle('00000000-0000-0000-0000-000000000000');
 
     expect($result)->toBeNull();
 });

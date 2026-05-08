@@ -11,7 +11,7 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class SearchByIngredientConversation extends Conversation
+final class SearchByIngredientConversation extends Conversation
 {
     /** @var string[] */
     protected array $selectedIngredients = [];
@@ -69,8 +69,7 @@ class SearchByIngredientConversation extends Conversation
             return;
         }
 
-        $found = Ingredient::where('id', 'ilike', "%{$text}%")
-            ->orWhere('name_en', 'ilike', "%{$text}%")
+        $found = Ingredient::where('name_en', 'ilike', "%{$text}%")
             ->orWhere('name_ru', 'ilike', "%{$text}%")
             ->take(5)
             ->get();

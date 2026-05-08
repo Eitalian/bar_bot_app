@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Models\Recipe;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class RecipeFactory extends Factory
+final class RecipeFactory extends Factory
 {
     protected $model = Recipe::class;
 
@@ -20,8 +20,8 @@ class RecipeFactory extends Factory
             'glass'        => $this->faker->randomElement([
                 'rocks', 'highball', 'cocktail', 'coupe', 'shot', 'margarita',
             ]),
-            'abv'          => $this->faker->randomFloat(1, 0, 45),
-            'volume'       => $this->faker->randomElement([30, 60, 100, 150, 200, 300]),
+            'abv'          => $this->faker->randomFloat(1, 0, 100),
+            'volume'       => $this->faker->numberBetween(30, 500),
             'icon'         => null,
             'photo'        => null,
             'taste_tags'   => null,
