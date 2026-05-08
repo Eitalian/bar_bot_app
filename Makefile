@@ -66,6 +66,14 @@ migration-refresh:
 migration-fresh:
 	${ARTISAN} migrate:fresh --drop-types --drop-views
 
+# ── DB exploration ────────────────────────────────────────────────────────────
+
+db-claude-ro-init:
+	${COMPOSE} exec -T postgres psql -U root -d bar_bot_app < docker/postgres/claude-ro.sql
+
+db-q:
+	${COMPOSE} exec -T postgres psql -U claude_ro -d bar_bot_app -c "$(Q)"
+
 # ── Artisan ───────────────────────────────────────────────────────────────────
 
 ide-helper:

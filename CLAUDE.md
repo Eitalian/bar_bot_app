@@ -28,6 +28,10 @@ make docker-rebuild
 make migration-run
 make migration-fresh        # drops and recreates all tables
 
+# DB exploration (read-only role; cluster-level, survives migration-fresh)
+make db-claude-ro-init       # one-time bootstrap; re-run only after volume reset
+make db-q Q="SELECT ..."     # run read-only query as claude_ro
+
 # Import cocktail recipes from data/recipes_final.json
 docker compose exec app php artisan bar:import
 
@@ -79,6 +83,8 @@ Pint with `"preset": "per"`. Excluded: `database/`, `config/`, `bootstrap/`. Tra
 
 **Конвенции миграций:** `.agents/specs/migration-conventions.md`
 
+**Миграции неизменяемы.** Существующие файлы в `database/migrations/` нельзя редактировать — только создавать новые ALTER-миграции (даже при использовании `migration-fresh`). История схемы живёт в git, ради воспроизводимости на CI и других окружениях.
+
 ## Git Workflow
 
 Работа ведётся в ветках, Claude создаёт PR — разработчик мержит вручную на GitHub.
@@ -99,6 +105,16 @@ Pint with `"preset": "per"`. Excluded: `database/`, `config/`, `bootstrap/`. Tra
 4. Мерж — вручную разработчиком
 
 ## Агентская разработка
+
+### Чтение спецификации перед исследованием
+
+При старте задачи или планирования — сначала читать `.agents/specs/bar-bot-design.md` и `.agents/knowledge/codebase.md`. Запускать Explore-агентов или Grep по кодовой базе только если спека и codebase не отвечают на конкретный вопрос. Параллельные Explore «для понимания архитектуры» поверх готовой спеки — потеря токенов и контекста.
+
+### Шаблон плана
+
+Все новые планы создаются по `.agents/plans/_template.md`. Шаблон фиксирует обязательные секции: **Goal**, **Branch**, **Карта файлов** (включая ancillary — `codebase.md`, дополнения к `routes/*.php`, фабрики), **Порядок исполнения** с обоснованием параллельных групп, **Depends on** на каждой задаче, и финальная задача с шагами «Обновить codebase.md» + «Открыть PR».
+
+В конце шаблона — pre-PR чеклист автора плана: пробежать его перед тем, как передать план субагент-диспетчеру или открыть PR на сам план. Невыполненная галочка → план возвращается на доработку, фазу не запускаем.
 
 ### Параллельные задачи в планах
 
@@ -156,6 +172,18 @@ Advisor и Reviewer работают в разных направлениях:
 **Правило пункта 6:** файл вне секции "Files" — не автоматический стоп, но требует явного обоснования (ссылка на Step плана, где это предусмотрено). Файл без обоснования — reviewer отклоняет.
 
 **Следствие для авторов планов:** секция "Files" обязана перечислять **все** файлы, упомянутые в Steps — включая ancillary (`codebase.md`, дополнения к `routes/*.php` и т.д.).
+
+---
+
+## Стиль ответов
+
+**Команды — дословно из секции Commands.** Когда упоминаешь запуск тестов / линта / миграций / импорта — цитируй конкретный `make` target или `docker compose exec` команду из этого файла. Не говори «запусти тесты» в обобщённой форме — пиши `make tests-feature` или `docker compose exec app php artisan test --filter=Foo`.
+
+**Архитектура — через ссылку на spec.** При объяснении устройства проекта (роутинг, conversations, модели, импорт) — ссылайся на `.agents/specs/bar-bot-design.md` и `.agents/knowledge/codebase.md`. Не разворачивай generic-лекцию по Laravel/Nutgram, если ответ зафиксирован в спеке — открой файл и процитируй нужный фрагмент.
+
+**Без хеджирования при наличии однозначного источника.** Если ответ есть в `codebase.md`, `migration-conventions.md` или этом `CLAUDE.md` — отвечай конкретно, без оговорок «возможно, в вашем проекте принято иначе» или «обычно в Laravel так-то». Открой файл и процитируй.
+
+**Skills работают поверх методологии проекта.** Когда срабатывает skill (brainstorming, TDD, debugging и т.п.), он накладывается на рабочий процесс этого проекта: spec → план в `.agents/plans/` с группами параллельности → executing-plans + reviewer + advisor по фазе. Skill не заменяет workflow — он встраивается внутрь конкретного шага.
 
 ---
 
