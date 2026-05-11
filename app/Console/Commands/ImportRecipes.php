@@ -9,7 +9,7 @@ use App\Models\RecipeTag;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class ImportRecipes extends Command
+final class ImportRecipes extends Command
 {
     protected $signature = 'bar:import {--file=data/recipes_final.json : путь к JSON файлу}';
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use SergiX44\Nutgram\Nutgram;
 
-class TelegramController extends Controller
+final class TelegramController extends Controller
 {
     /**
      * Handle the request.

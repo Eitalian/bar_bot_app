@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property UserRole $role
  * @property \Illuminate\Support\Carbon $created_at
  */
-class User extends Model implements Authenticatable
+final class User extends Model implements Authenticatable
 {
     use HasFactory, AuthenticatableTrait;
 

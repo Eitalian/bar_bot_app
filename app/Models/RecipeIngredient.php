@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class RecipeIngredient extends Model
+final class RecipeIngredient extends Model
 {
     public $timestamps = false;
 

@@ -19,8 +19,7 @@
       "Bash(npm run *)",
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
-      "mcp__plugin_telegram_telegram__reply",
-      "Bash(powershell.exe *)"
+      "mcp__plugin_telegram_telegram__reply"
     ],
     "deny": [
       "Bash(git push origin master)",

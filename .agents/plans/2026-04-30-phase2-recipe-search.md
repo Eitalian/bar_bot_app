@@ -67,9 +67,11 @@
 3. git status  →  нет неотслеживаемых или незакоммиченных файлов
 4. Все файлы задачи из секции "Files" существуют
 5. В отчёте агента: список изменённых файлов + краткое описание что сделано
+6. git diff HEAD~{N}..HEAD --name-only  →  файлы ВНЕ секции "Files" объяснены в отчёте
 ```
 
-Если хотя бы один пункт не выполнен — агент не передаёт управление, а исправляет проблему.
+Если пункты 1–5 не выполнены — агент исправляет проблему до передачи управления.
+Пункт 6: файл вне секции "Files" — не стоп, но требует явного обоснования в отчёте (ссылка на Step плана). Файл без обоснования → reviewer отклоняет.
 
 ---
 
@@ -1509,6 +1511,7 @@ git commit --author="Claude <claude@anthropic.com>" -m "feat(bb6): GET /api/reci
 - Create: `app/Actions/Search/SearchRecipesAction.php`
 - Create: `tests/Feature/Actions/Search/SearchRecipesActionTest.php`
 - Modify: `routes/api.php`
+- Modify: `.agents/knowledge/codebase.md`  ← Step 9
 
 - [ ] **Step 1: Написать падающий тест**
 

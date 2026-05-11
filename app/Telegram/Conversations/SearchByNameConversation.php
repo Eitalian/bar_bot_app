@@ -2,19 +2,19 @@
 
 namespace App\Telegram\Conversations;
 
-use App\Models\Recipe;
+use App\Data\Search\SearchRecipesData;
+use App\Handlers\Search\SearchRecipesHandler;
+use App\Services\BrowseContext;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-class SearchByNameConversation extends Conversation
+final class SearchByNameConversation extends Conversation
 {
     protected const PER_PAGE = 5;
 
     protected ?string $query = null;
-
-    protected int $page = 1;
 
     public function start(Nutgram $bot): void
     {
@@ -33,33 +33,36 @@ class SearchByNameConversation extends Conversation
             return;
         }
 
-        $this->page = 1;
         $this->showResults($bot);
         $this->end();
     }
 
     private function showResults(Nutgram $bot): void
     {
-        $query = $this->query;
-        $page = $this->page;
+        $data = new SearchRecipesData(
+            q: $this->query,
+            perPage: self::PER_PAGE,
+        );
 
-        $results = Recipe::where('name_ru', 'ilike', "%{$query}%")
-            ->orWhere('name_en', 'ilike', "%{$query}%")
-            ->orderBy('name_ru')
-            ->paginate(self::PER_PAGE, ['*'], 'page', $page);
+        $results = app(SearchRecipesHandler::class)->handle($data);
 
         if ($results->isEmpty()) {
-            $bot->sendMessage("😔 По запросу *\"{$query}\"* ничего не найдено.\n\nПопробуй другое название.", parse_mode: 'Markdown');
+            $bot->sendMessage(
+                "😔 По запросу *\"{$this->query}\"* ничего не найдено.\n\nПопробуй другое название.",
+                parse_mode: 'Markdown',
+            );
 
             return;
         }
 
-        $text = "🔍 Результаты поиска: *\"{$query}\"*\n";
-        $text .= "Найдено: {$results->total()} | Страница {$page}/{$results->lastPage()}\n\n";
+        $browseKey = app(BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
+
+        $text = "🔍 Результаты поиска: *\"{$this->query}\"*\n";
+        $text .= "Найдено: {$results->total()} рецептов\n\n";
 
         $keyboard = InlineKeyboardMarkup::make();
 
-        foreach ($results as $recipe) {
+        foreach ($results->values() as $pos => $recipe) {
             $abv = $recipe->abv ? " {$recipe->abv}%" : '';
             $vol = $recipe->volume ? " {$recipe->volume}мл" : '';
             $text .= "• {$recipe->name_ru}{$abv}{$vol}\n";
@@ -67,21 +70,9 @@ class SearchByNameConversation extends Conversation
             $keyboard->addRow(
                 InlineKeyboardButton::make(
                     "🍹 {$recipe->name_ru}",
-                    callback_data: "recipe:show:{$recipe->id}",
+                    callback_data: "recipe:browse:{$browseKey}:{$pos}",
                 ),
             );
-        }
-
-        // Навигация
-        $nav = [];
-        if ($results->currentPage() > 1) {
-            $nav[] = InlineKeyboardButton::make('◀️', callback_data: 'search:page:' . ($page - 1) . ":{$query}");
-        }
-        if ($results->hasMorePages()) {
-            $nav[] = InlineKeyboardButton::make('▶️', callback_data: 'search:page:' . ($page + 1) . ":{$query}");
-        }
-        if (! empty($nav)) {
-            $keyboard->addRow(...$nav);
         }
 
         $bot->sendMessage(text: $text, parse_mode: 'Markdown', reply_markup: $keyboard);
