@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Telegram\Handlers;
+namespace App\Actions;
 
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-final class StartHandler
+final class StartAction
 {
-    public function __invoke(Nutgram $bot): void
+    public function fromTelegram(Nutgram $bot): void
     {
         $name = $bot->user()?->first_name ?? 'друг';
 

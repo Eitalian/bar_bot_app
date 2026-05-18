@@ -2,9 +2,8 @@
 
 namespace App\Telegram\Conversations;
 
+use App\Actions\Search\SearchRecipesAction;
 use App\Data\Search\SearchRecipesData;
-use App\Handlers\Search\SearchRecipesHandler;
-use App\Services\BrowseContext;
 use SergiX44\Nutgram\Conversations\Conversation;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -214,31 +213,6 @@ final class FilterConversation extends Conversation
             perPage: config('bar.search.per_page'),
         );
 
-        $results = app(SearchRecipesHandler::class)->handle($data);
-
-        if ($results->isEmpty()) {
-            $bot->sendMessage('😔 По выбранным фильтрам ничего не найдено. Попробуйте другие параметры.');
-
-            return;
-        }
-
-        $browseKey = app(BrowseContext::class)->store($results->pluck('id')->all(), $bot->userId());
-
-        $text = "🎛 *Результаты фильтрации:*\nНайдено: {$results->total()} рецептов\n\n";
-        $keyboard = InlineKeyboardMarkup::make();
-
-        foreach ($results->values() as $pos => $recipe) {
-            $abv = $recipe->abv ? " {$recipe->abv}%" : '';
-            $vol = $recipe->volume ? " {$recipe->volume}мл" : '';
-            $text .= "• {$recipe->name_ru}{$abv}{$vol}\n";
-            $keyboard->addRow(
-                InlineKeyboardButton::make(
-                    "🍹 {$recipe->name_ru}",
-                    callback_data: "recipe:browse:{$browseKey}:{$pos}",
-                ),
-            );
-        }
-
-        $bot->sendMessage(text: $text, parse_mode: 'Markdown', reply_markup: $keyboard);
+        app(SearchRecipesAction::class)->fromTelegram($bot, $data);
     }
 }

@@ -61,11 +61,11 @@ Run a single test: `docker compose exec app php artisan test --filter=TestName`
 
 ## Architecture
 
-**Request flow**: ngrok → `TelegramController` → Nutgram → `routes/telegram.php` → Handler or Conversation → Eloquent models
+**Request flow**: ngrok → `TelegramController` → Nutgram → `routes/telegram.php` → Action или Conversation → Action → Handler → Eloquent models
 
-**`routes/telegram.php`** is the bot routing file (analogous to `routes/web.php` for HTTP). Register handlers and conversations here. Currently most handlers are commented out — only a basic `/start` closure is active.
+**Архитектурное правило Conversation × Action:** `.agents/specs/conversation-action-architecture.md` — Action = единая точка входа per (UI × use-case); Conversation НЕ зовёт Handler напрямую, только через `Action::fromTelegram(...)`.
 
-**Handlers** (`app/Telegram/Handlers/`) are simple invokable classes for stateless responses (e.g., showing a recipe card on callback query). Route pattern: `$bot->onCallbackQueryData('recipe:show:{id}', RecipeHandler::class)`.
+**`routes/telegram.php`** is the bot routing file (analogous to `routes/web.php` for HTTP). Маршруты указывают либо на `[Action::class, 'fromTelegram']`, либо на `Conversation::begin` для multi-step UX.
 
 **Conversations** (`app/Telegram/Conversations/`) extend Nutgram's `Conversation` class for multi-step flows. State is stored as protected class properties that Nutgram serializes between steps. Each step calls `$this->next('methodName')` to queue the next handler; `$this->end()` terminates the conversation.
 

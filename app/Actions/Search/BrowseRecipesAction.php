@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Telegram\Handlers;
+namespace App\Actions\Search;
 
 use App\Handlers\Search\GetRecipeHandler;
 use App\Services\BrowseContext;
@@ -8,14 +8,14 @@ use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
-final class RecipeBrowseHandler
+final class BrowseRecipesAction
 {
     public function __construct(
         private GetRecipeHandler $recipeHandler,
         private BrowseContext $browseContext,
     ) {}
 
-    public function __invoke(Nutgram $bot, string $browseKey, int $pos): void
+    public function fromTelegram(Nutgram $bot, string $browseKey, int $pos): void
     {
         $ids = $this->browseContext->get($browseKey);
 
