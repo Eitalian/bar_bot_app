@@ -47,8 +47,8 @@ final class StartSessionHandler
             'ended_at'   => null,
         ]);
 
-        CloseSessionJob::dispatch($session->id, $this->schedule->expectedEndAt($now))
-            ->delay($this->schedule->expectedEndAt($now));
+        $endAt = $this->schedule->expectedEndAt($now);
+        CloseSessionJob::dispatch($session->id, $endAt)->delay($endAt);
 
         return $session;
     }
