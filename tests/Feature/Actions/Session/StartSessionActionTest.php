@@ -15,7 +15,7 @@ it('POST returns 201 for bartender, body contains created session', function () 
         ->assertCreated()
         ->assertJsonPath('bar_id', 1)
         ->assertJsonPath('ended_at', null);
-})->skip('routes registered in T10');
+});
 
 it('POST returns 403 for guest', function () {
     CarbonImmutable::setTestNow('2026-05-10 18:00:00');
@@ -23,7 +23,7 @@ it('POST returns 403 for guest', function () {
 
     $this->postJson("/api/bars/1/session?telegram_id={$user->telegram_id}")
         ->assertForbidden();
-})->skip('routes registered in T10');
+});
 
 it('POST is idempotent — returns existing active session on second call', function () {
     Queue::fake();
@@ -34,7 +34,7 @@ it('POST is idempotent — returns existing active session on second call', func
     $second = $this->postJson("/api/bars/1/session?telegram_id={$user->telegram_id}")->json('id');
 
     expect($first)->toBe($second);
-})->skip('routes registered in T10');
+});
 
 it('POST returns 409 when bar is closed (BarClosedException)', function () {
     CarbonImmutable::setTestNow('2026-05-10 09:00:00'); // бар закрыт
@@ -42,11 +42,11 @@ it('POST returns 409 when bar is closed (BarClosedException)', function () {
 
     $this->postJson("/api/bars/1/session?telegram_id={$user->telegram_id}")
         ->assertStatus(409); // Conflict — domain rule violation
-})->skip('routes registered in T10');
+});
 
 it('POST returns 404 when bar id does not match config', function () {
     $user = User::factory()->bartender()->create();
 
     $this->postJson("/api/bars/2/session?telegram_id={$user->telegram_id}")
         ->assertNotFound();
-})->skip('routes registered in T10');
+});

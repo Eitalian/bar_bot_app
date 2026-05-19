@@ -17,7 +17,7 @@
 | 1 | Инвентарь ингредиентов (Telegram + HTTP API) | ✅ Готово |
 | 1.1 | Роли и контроль доступа (guest/bartender/owner) | ✅ Готово |
 | 2 | Поиск рецептов (Telegram + HTTP API) | ✅ Готово |
-| 3 | Бар-сессии | ⏳ Не начато |
+| 3 | Бар-сессии | ✅ Готово |
 | 3.1 | Заказы коктейлей | ⏳ Не начато |
 | 4 | Избранное и оценки | ⏳ Не начато |
 | 5 | Загрузка фото | ⏳ Не начато |
@@ -105,6 +105,61 @@ $this->app->make(Dispatcher::class)->map([
 
 ---
 
+## Bar (app/Models/Bar.php) — POPO singleton
+
+`Bar` — plain PHP object без таблицы в БД. Строится из `config/bar.php`.
+
+```php
+// Разрешается через DI (singleton зарегистрирован в AppServiceProvider):
+$bar = app(Bar::class); // всегда один экземпляр
+
+// Фабричный метод (используется при регистрации):
+$bar = Bar::default(); // читает config('bar.*')
+
+// Поля:
+$bar->id               // int, совпадает с config('bar.id') = 1
+$bar->name             // string
+$bar->workStart        // string '12:00'
+$bar->workEnd          // string '06:00' (через полночь)
+$bar->openCutoffMinutes // int, 30
+```
+
+Эволюция к мульти-бару — без переписывания consumers: singleton меняется на коллекцию, Action принимает `{id}` из маршрута и выбирает нужный экземпляр.
+
+---
+
+## BarSchedule (app/Services/BarSchedule.php)
+
+Сервис расписания бара. Умеет работать с окном через полночь (12:00–06:00).
+
+```php
+// Возвращает ['start' => CarbonImmutable, 'end' => CarbonImmutable] или null (бар закрыт)
+$schedule->currentWindow(?CarbonInterface $now = null): ?array
+
+// Окно, в котором стартовала конкретная сессия (гарантированно не null)
+$schedule->windowFor(CarbonInterface $startedAt): array
+
+// Находится ли $now внутри окна, в котором стартовала сессия
+$schedule->isInWindow(CarbonInterface $startedAt, ?CarbonInterface $now = null): bool
+
+// Можно ли сейчас открыть сессию (бар открыт + не в cutoff-зоне последних 30 мин)
+$schedule->canOpenAt(CarbonInterface $now): bool
+
+// Ожидаемое время авто-закрытия сессии (конец рабочего окна)
+$schedule->expectedEndAt(CarbonInterface $startedAt): CarbonImmutable
+```
+
+---
+
+## Queue infrastructure
+
+- **Driver:** `database` (таблица `jobs` из baseline scaffolding Laravel, уже присутствовала до Phase 3)
+- **Worker:** отдельный контейнер `queue` в `docker-compose.yml`, запускает `php artisan queue:work`
+- **`$tries`:** задаётся в Job-классе (`public int $tries = 3`), а не в аргументах worker — это source of truth
+- **CloseSessionJob:** delayed dispatch через `->delay($endAt)`. Self-healing при старте новой сессии — вызывает `->handle()` напрямую, минуя диспетчер (Queue::fake не перехватывает)
+
+---
+
 ## Nutgram: особенности Conversations
 
 Conversations сериализуются между шагами. `protected` свойства хранят состояние между шагами (сохраняются в Redis/кэше). **Классы сервисов (handlers) нельзя хранить в `protected` свойствах** — они не сериализуемы.
@@ -181,6 +236,13 @@ onCallbackQueryData('cmd:filter')         → FilterConversation::begin
 onCallbackQueryData('recipe:browse:{browseKey}:{pos}') → BrowseRecipesAction::fromTelegram
 onCallbackQueryData('recipe:show:{id}')   → GetRecipeAction::fromTelegram
 onCallbackQueryData('browse:back')        → StartAction::fromTelegram
+
+// Phase 3 (активны):
+onCommand('session')                      → SessionAction::fromTelegram
+onCallbackQueryData('cmd:session')        → SessionAction::fromTelegram
+
+Group [CanManageMiddleware]:
+  onCallbackQueryData('session:start')    → StartSessionAction::fromTelegram
 ```
 
 ### Кнопки главного меню (StartAction)
@@ -190,6 +252,7 @@ onCallbackQueryData('browse:back')        → StartAction::fromTelegram
 🧪 По ингредиентам    → callback_data: 'cmd:ingredients'
 🎛 Фильтры            → callback_data: 'cmd:filter'
 📦 Инвентарь          → callback_data: 'inventory:show'
+🍸 Сессия             → callback_data: 'cmd:session'
 ```
 
 ---
@@ -205,6 +268,9 @@ DELETE /api/inventory/{id}         → RemoveInventoryAction  [+CanManageMiddlew
 
 GET    /api/recipes                → SearchRecipesAction    (без auth)
 GET    /api/recipes/{id}           → GetRecipeAction        (без auth)
+
+GET    /api/bars/{id}/session      → SessionAction          [auth.telegram]
+POST   /api/bars/{id}/session      → StartSessionAction     [auth.telegram + CanManageMiddleware]
 ```
 
 **Как работает `auth.telegram` middleware**: ищет `User` по `telegram_id` из query-параметра. Если не найден → 404. Используется в тестах как `?telegram_id={$user->telegram_id}`.
@@ -251,6 +317,17 @@ $user->inventory() // HasMany Inventory
 UserRole::Guest     // canManage() → false (default для новых пользователей)
 UserRole::Bartender // canManage() → true
 UserRole::Owner     // canManage() → true
+```
+
+### BarSession
+
+```php
+// PK: SMALLINT GENERATED ALWAYS AS IDENTITY (32k значений = 89 лет ежедневных сессий)
+// $timestamps = false (нет created_at/updated_at — только started_at/ended_at)
+// Fillable: bar_id, started_at, ended_at
+// Casts: bar_id→integer, started_at→CarbonImmutable, ended_at→CarbonImmutable|null
+// Partial unique index: uq_bar_sessions_active (bar_id) WHERE ended_at IS NULL — гарантирует одну активную сессию на бар
+$session->ended_at === null  // активная сессия
 ```
 
 ### RecipeIngredient
@@ -348,6 +425,8 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 5. **`taste_tags`** — зарезервированная колонка (JSON array). Команда `bar:taste:fill` не реализована.
 
 6. **`Recipe` без `user_id`** — встроенные рецепты не принадлежат пользователям. `user_id` появится в Phase 6 (форк).
+
+7. **Авто-закрытие бар-сессии** — при старте создаётся `CloseSessionJob` с delay до конца рабочего окна (06:00). Выполняется воркером из контейнера `queue`. Self-healing: при старте новой сессии протухшая (из предыдущего окна) закрывается синхронно через `->handle()`, минуя диспетчер — это гарантирует корректную работу даже с `Queue::fake()` в тестах.
 
 ---
 
