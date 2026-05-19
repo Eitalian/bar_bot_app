@@ -57,7 +57,7 @@
 |---|---|
 | `routes/api.php` | Добавить `POST` и `GET` `/bars/{id}/session` (под `auth.telegram` + write под `CanManageMiddleware`) |
 | `routes/telegram.php` | Добавить `onCommand('session', SessionAction::fromTelegram)`, в группе `CanManageMiddleware` — `onCallbackQueryData('session:start', StartSessionAction::fromTelegram)` |
-| `app/Telegram/Handlers/StartHandler.php` | Добавить кнопку «🍸 Сессия» в главное меню (callback `cmd:session`) и обработать его как редирект на `SessionAction::fromTelegram` |
+| `app/Actions/StartAction.php` | Добавить кнопку «🍸 Сессия» в главное меню (callback `cmd:session`) — в row 2 третьей кнопкой рядом с «🎛 Фильтры» и «📦 Инвентарь» |
 | `app/Providers/AppServiceProvider.php` | `$this->app->singleton(Bar::class, fn () => Bar::default())` |
 | `app/Providers/BusServiceProvider.php` | `StartSessionData::class => StartSessionHandler::class` |
 | `docker-compose.yml` | Новый сервис `queue` (тот же образ, что `app`), команда `php artisan queue:work --sleep=3` (без `--tries`, чтобы значение из job не переопределялось) |
@@ -963,14 +963,17 @@ it('self-heals stale session and creates new', function () {
     Queue::fake();
     // Просроченная сессия со вчерашних 18:00
     CarbonImmutable::setTestNow('2026-05-09 18:00:00');
-    BarSession::factory()->create(['started_at' => now()]);
+    $stale = BarSession::factory()->create(['started_at' => now()]);
 
     // Сейчас 13:00 следующего дня — вчерашнее окно давно закрылось
     CarbonImmutable::setTestNow('2026-05-10 13:00:00');
     $handler = app(StartSessionHandler::class);
     $result = $handler->handle(new StartSessionData);
 
-    // Старая сессия закрыта (sync), создана новая
+    // Старая сессия закрыта (dispatchSync — выполняется синхронно, Queue::fake() не перехватывает)
+    expect($stale->fresh()->ended_at)->not->toBeNull();
+
+    // Создана новая активная сессия
     expect(BarSession::count())->toBe(2)
         ->and($result->ended_at)->toBeNull()
         ->and($result->started_at->toIso8601String())->toBe('2026-05-10T13:00:00+00:00');
@@ -1522,6 +1525,7 @@ git commit --author="Claude <claude@anthropic.com>" -m "feat(bb-7): StartSession
 - Modify: `tests/Feature/Actions/Session/SessionActionTest.php` (снять `->skip`)
 - Modify: `tests/Feature/Actions/Session/StartSessionActionTest.php` (снять `->skip`)
 - Create: `tests/Feature/PhaseThreeFlowTest.php`
+- Modify: `app/Actions/StartAction.php` (кнопка «🍸 Сессия» в row 2)
 - Modify: `.agents/knowledge/codebase.md`
 - Modify: `.agents/specs/bar-bot-design.md`
 - Modify: `.agents/specs/migration-conventions.md`
@@ -1560,13 +1564,17 @@ $bot->group(function (Nutgram $bot) {
 
 - [ ] **Step 3: Кнопка «🍸 Сессия» в главном меню**
 
-В `app/Telegram/Handlers/StartHandler.php` найти место, где собираются кнопки главного меню (сейчас там «🔍 Поиск», «🧪 По ингредиентам», «🎛 Фильтры», «📦 Инвентарь»), и добавить пятую:
+В `app/Actions/StartAction.php` (файл переехал из `app/Telegram/Handlers/StartHandler.php` после рефакторинга) найти row 2 клавиатуры и добавить третью кнопку:
 
 ```php
-InlineKeyboardButton::make(text: '🍸 Сессия', callback_data: 'cmd:session'),
+->addRow(
+    InlineKeyboardButton::make('🎛 Фильтры', callback_data: 'cmd:filter'),
+    InlineKeyboardButton::make('📦 Инвентарь', callback_data: 'inventory:show'),
+    InlineKeyboardButton::make('🍸 Сессия', callback_data: 'cmd:session'),
+)
 ```
 
-Расположить логически рядом с «📦 Инвентарь» (обе — операционные).
+Три кнопки в ряду — нормально для Telegram; «🍸 Сессия» рядом с «📦 Инвентарь» (обе — операционные).
 
 - [ ] **Step 4: Снять `->skip()` с feature-тестов T8/T9**
 
@@ -1704,7 +1712,7 @@ make tests
 ```bash
 git add routes/api.php \
         routes/telegram.php \
-        app/Telegram/Handlers/StartHandler.php \
+        app/Actions/StartAction.php \
         tests/Feature/Actions/Session/SessionActionTest.php \
         tests/Feature/Actions/Session/StartSessionActionTest.php \
         tests/Feature/PhaseThreeFlowTest.php \
