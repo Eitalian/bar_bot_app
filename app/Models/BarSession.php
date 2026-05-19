@@ -16,6 +16,7 @@ final class BarSession extends Model
     protected $fillable = ['bar_id', 'started_at', 'ended_at'];
 
     protected $casts = [
+        'bar_id'     => 'integer',
         'started_at' => 'immutable_datetime',
         'ended_at'   => 'immutable_datetime',
     ];
