@@ -38,6 +38,24 @@ services:
     ports:
       - 5433:5432
 
+  queue:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: bar-bot-queue
+    restart: unless-stopped
+    # --tries not specified intentionally: the Job itself sets $tries,
+    # so worker should not override the contract.
+    command: php artisan queue:work --sleep=3 --queue=default
+    volumes:
+      - .:/var/www
+      - ./data:/var/www/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bar-net
+
   ngrok:
     image: ngrok/ngrok:latest
     container_name: bar-bot-ngrok
