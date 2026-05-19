@@ -29,6 +29,8 @@
 
 **Правило:** каждая фича = один Action (транспортный адаптер) + один Handler (бизнес-логика) + один DTO.
 
+**Action — единая точка входа per (UI × use-case)**. Conversation НЕ зовёт Handler напрямую — только через `Action::fromTelegram(...)`. Спека: `.agents/specs/conversation-action-architecture.md`.
+
 ### Handler (чистая логика, без транспорта)
 
 ```php
@@ -107,17 +109,21 @@ $this->app->make(Dispatcher::class)->map([
 
 Conversations сериализуются между шагами. `protected` свойства хранят состояние между шагами (сохраняются в Redis/кэше). **Классы сервисов (handlers) нельзя хранить в `protected` свойствах** — они не сериализуемы.
 
-**Паттерн для вызова handler из Conversation:**
+**Паттерн для вызова Action из Conversation:**
 
 ```php
-// Правильно: разрешать через app() внутри метода
+// Правильно: разрешать Action через app() внутри метода (Conversation НЕ зовёт Handler напрямую)
 private function showResults(Nutgram $bot): void
 {
-    $result = app(SearchRecipesHandler::class)->handle($data);
+    $data = new SearchRecipesData(...);
+    app(SearchRecipesAction::class)->fromTelegram($bot, $data);
 }
 
-// Неправильно: хранить handler как protected свойство
-protected SearchRecipesHandler $handler; // сломается после десериализации
+// Неправильно: хранить Action или Handler как protected свойство
+protected SearchRecipesAction $action; // сломается после десериализации
+
+// Неправильно: обходить Action
+app(SearchRecipesHandler::class)->handle($data); // ❌ нарушение архитектурного правила
 ```
 
 **Структура шагов:**
@@ -158,7 +164,7 @@ $bot->onCallbackQueryData('cmd:search', fn(Nutgram $bot) => SearchByNameConversa
 ```
 Global middleware: AuthenticateTelegramUser (создаёт User из telegram_id, логинит через Auth::login)
 
-onCommand('start')       → StartHandler
+onCommand('start')       → StartAction::fromTelegram
 onCommand('inventory')   → InventoryAction::fromTelegram
 onCallbackQueryData('inventory:show')   → InventoryAction::fromTelegram
 
@@ -172,12 +178,12 @@ onCallbackQueryData('noop')         → answerCallbackQuery (no-op)
 onCallbackQueryData('cmd:search')         → SearchByNameConversation::begin
 onCallbackQueryData('cmd:ingredients')    → SearchByIngredientConversation::begin
 onCallbackQueryData('cmd:filter')         → FilterConversation::begin
-onCallbackQueryData('recipe:browse:{browseKey}:{pos}') → RecipeBrowseHandler
-onCallbackQueryData('recipe:show:{id}')   → RecipeHandler
-onCallbackQueryData('browse:back')        → StartHandler
+onCallbackQueryData('recipe:browse:{browseKey}:{pos}') → BrowseRecipesAction::fromTelegram
+onCallbackQueryData('recipe:show:{id}')   → GetRecipeAction::fromTelegram
+onCallbackQueryData('browse:back')        → StartAction::fromTelegram
 ```
 
-### Кнопки главного меню (StartHandler)
+### Кнопки главного меню (StartAction)
 
 ```
 🔍 Поиск по названию  → callback_data: 'cmd:search'
@@ -331,7 +337,7 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 
 ## Известные особенности и ограничения
 
-1. **`browse:back` callback** (в RecipeHandler) — кнопка «🔙 К поиску» отправляет `callback_data: 'browse:back'`. Маршрут будет зарегистрирован в Task 6 Phase 2. До тех пор Nutgram игнорирует необработанные callback queries (не крашится).
+1. **`browse:back` callback** — кнопка «🔙 К поиску» отправляет `callback_data: 'browse:back'`, маршрутизируется на `StartAction::fromTelegram` (т.е. возвращает пользователя в главное меню).
 
 2. **`ing:add:{id}` callbacks** (SearchByIngredientConversation) — когда найдено несколько ингредиентов, conversation показывает кнопки с `ing:add:{id}`. Шаг `handleIngredient` читает `$bot->message()->text`, а не callback_data — при нажатии кнопки `text` будет `null`, поиск выполнится по пустой строке. Известный баг, не мешает основному флоу.
 
@@ -356,11 +362,14 @@ $ids = (new BrowseContext)->get($key); // string[]|null
 
 Кэш-ключ формата `browse:{telegramId}`, метод `get()` принимает строку `telegramId` без префикса.
 
-## RecipeBrowseHandler (app/Telegram/Handlers/RecipeBrowseHandler.php)
+## Поисковые Actions (app/Actions/Search/)
 
-Инлайн-обработчик для навигации по результатам поиска. Маршрут: `recipe:browse:{browseKey}:{pos}`.
+- **SearchRecipesAction** — `__invoke` для HTTP `/api/recipes` и `fromTelegram(Nutgram, SearchRecipesData)` для Telegram. Выбирает header по наличию `$data->q` («поиск» vs «фильтрация»). Используется из `FilterConversation` и `SearchByNameConversation`.
+- **SearchByIngredientAction** — `fromTelegram(Nutgram, SearchByIngredientData)`. Action limited Telegram-only (HTTP-эндпоинта пока нет). Использует `SearchByIngredientHandler`, рендерит до 10 рецептов + overflow «и ещё N».
+- **GetRecipeAction** — `__invoke` для HTTP `/api/recipes/{id}` + `fromTelegram(Nutgram, string $id)` для одиночного отображения карточки (`editMessageText` + кнопка «🔙 К поиску»).
+- **BrowseRecipesAction** — `fromTelegram(Nutgram, string $browseKey, int $pos)`. Маршрут `recipe:browse:{browseKey}:{pos}`. Читает IDs из `BrowseContext`, строит клавиатуру с навигацией ◀️/▶️, «🔙 К поиску», «🛒 Заказать» / «🍴 Форкнуть» (noop). При просроченном контексте → `answerCallbackQuery` с текстом ошибки.
+- **StartAction** (`app/Actions/StartAction.php`) — `fromTelegram(Nutgram)`. Рендерит главное меню. Используется для `/start` и для `browse:back` (возврат в меню из карточки рецепта).
 
-- Читает список IDs из BrowseContext по `browseKey`
-- Показывает рецепт по позиции через `GetRecipeHandler`
-- Строит клавиатуру с кнопками «◀️ Пред.» / «▶️ След.» (если позиция не крайняя), «🔙 К поиску» (browse:back), «🛒 Заказать» / «🍴 Форкнуть» (noop)
-- При просроченном контексте или несуществующем рецепте — `answerCallbackQuery` с текстом ошибки
+## SearchResultsResponse (app/Telegram/Responses/SearchResultsResponse.php)
+
+Инкапсулирует рендер списка рецептов с inline-клавиатурой. Конструктор: `header`, `recipes` (iterable Recipe — уже отрезанная коллекция), `browseKey`, `showVolume = true`, `overflowText = null`. Используется в `SearchRecipesAction::fromTelegram` и `SearchByIngredientAction::fromTelegram`.
