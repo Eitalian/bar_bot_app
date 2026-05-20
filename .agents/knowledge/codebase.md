@@ -330,6 +330,8 @@ UserRole::Owner     // canManage() → true
 $session->ended_at === null  // активная сессия
 ```
 
+`StartSessionHandler` идемпотентен под гонкой: после `SELECT active` (нет) → `create()` партиал-индекс может отклонить вставку, если конкурент успел открыть сессию первым. `catch (QueryException)` делает re-SELECT и возвращает сессию-победителя (её `CloseSessionJob` уже поставлен), не диспатча дубль-джобу. Если активной в окне нет — исключение пробрасывается.
+
 ### RecipeIngredient
 
 ```php
@@ -427,6 +429,8 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 6. **`Recipe` без `user_id`** — встроенные рецепты не принадлежат пользователям. `user_id` появится в Phase 6 (форк).
 
 7. **Авто-закрытие бар-сессии** — при старте создаётся `CloseSessionJob` с delay до конца рабочего окна (06:00). Выполняется воркером из контейнера `queue`. Self-healing: при старте новой сессии протухшая (из предыдущего окна) закрывается синхронно через `->handle()`, минуя диспетчер — это гарантирует корректную работу даже с `Queue::fake()` в тестах.
+
+8. **`orders.session_id` без FK после Phase 3** — миграция `2026_05_10_000001_create_bar_sessions_table` делает `DROP TABLE bar_sessions CASCADE`, что заодно сносит FK `fk_orders_session_id` из таблицы-заглушки `orders`. Итог: `orders.session_id` остаётся `BIGINT` **без** FK, тогда как новый `bar_sessions.id` — `SMALLINT`. Phase 4 (orders), восстанавливая связь, обязана `ALTER COLUMN orders.session_id TYPE SMALLINT` перед добавлением FK на `bar_sessions(id)`.
 
 ---
 

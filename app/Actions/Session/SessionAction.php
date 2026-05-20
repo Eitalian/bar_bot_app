@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Properties\ParseMode;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
+use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 final class SessionAction
 {
@@ -39,9 +41,7 @@ final class SessionAction
     {
         $session = $this->handler->handle();
         $now = CarbonImmutable::now();
-        $canManage = $bot->user()
-            ? auth()->user()?->role->canManage() ?? false
-            : false;
+        $canManage = auth()->user()?->role->canManage() ?? false;
 
         if ($session !== null) {
             $bot->sendMessage(
@@ -65,8 +65,8 @@ final class SessionAction
         if ($this->schedule->canOpenAt($now)) {
             $bot->sendMessage(
                 text: '🍸 Бар работает. Открыть сессию?',
-                reply_markup: \SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup::make()
-                    ->addRow(\SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton::make(
+                reply_markup: InlineKeyboardMarkup::make()
+                    ->addRow(InlineKeyboardButton::make(
                         text: '🟢 Старт',
                         callback_data: 'session:start',
                     )),

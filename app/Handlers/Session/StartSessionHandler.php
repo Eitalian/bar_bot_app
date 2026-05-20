@@ -9,6 +9,7 @@ use App\Models\Bar;
 use App\Models\BarSession;
 use App\Services\BarSchedule;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
 
 final class StartSessionHandler
 {
@@ -41,11 +42,27 @@ final class StartSessionHandler
             (new CloseSessionJob($active->id, $expectedEnd))->handle();
         }
 
-        $session = BarSession::create([
-            'bar_id'     => $this->bar->id,
-            'started_at' => $now,
-            'ended_at'   => null,
-        ]);
+        try {
+            $session = BarSession::create([
+                'bar_id'     => $this->bar->id,
+                'started_at' => $now,
+                'ended_at'   => null,
+            ]);
+        } catch (QueryException $e) {
+            // Гонка: конкурент создал активную сессию между SELECT и INSERT;
+            // partial unique index uq_bar_sessions_active отклонил вставку.
+            // Возвращаем сессию-победителя (победитель уже поставил свою CloseSessionJob).
+            $winner = BarSession::query()
+                ->where('bar_id', $this->bar->id)
+                ->whereNull('ended_at')
+                ->first();
+
+            if ($winner && $this->schedule->isInWindow($winner->started_at, $now)) {
+                return $winner;
+            }
+
+            throw $e;
+        }
 
         $endAt = $this->schedule->expectedEndAt($now);
         CloseSessionJob::dispatch($session->id, $endAt)->delay($endAt);
