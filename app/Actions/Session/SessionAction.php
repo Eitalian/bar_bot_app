@@ -22,19 +22,17 @@ final class SessionAction
         private readonly BarSchedule $schedule,
     ) {}
 
-    public function __invoke(Request $request, int $id): JsonResponse|Response
+    public function __invoke(Request $request, int $barId): JsonResponse|Response
     {
-        if ($id !== $this->bar->id) {
+        if ($barId !== $this->bar->id) {
             abort(404);
         }
 
         $session = $this->handler->handle();
 
-        if ($session === null) {
-            return response()->noContent();
-        }
-
-        return response()->json($session);
+        return $session !== null
+            ? response()->json($session)
+            : response()->noContent();
     }
 
     public function fromTelegram(Nutgram $bot): void

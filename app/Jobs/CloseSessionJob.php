@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
+use App\Models\BarSession;
 
 final class CloseSessionJob implements ShouldQueue
 {
@@ -28,8 +28,7 @@ final class CloseSessionJob implements ShouldQueue
     public function handle(): void
     {
         // Atomic: WHERE ended_at IS NULL делает закрытие идемпотентным.
-        DB::table('bar_sessions')
-            ->where('id', $this->sessionId)
+        BarSession::where('id', $this->sessionId)
             ->whereNull('ended_at')
             ->update(['ended_at' => $this->endAt]);
     }

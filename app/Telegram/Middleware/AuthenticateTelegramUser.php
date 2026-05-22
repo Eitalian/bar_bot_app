@@ -18,7 +18,7 @@ final class AuthenticateTelegramUser
                     'username' => $bot->user()?->username,
                 ],
             );
-            Auth::login($user);
+            Auth::setUser($user);
         }
 
         $next($bot);

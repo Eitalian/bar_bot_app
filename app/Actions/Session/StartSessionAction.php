@@ -14,9 +14,9 @@ final class StartSessionAction
 {
     public function __construct(private readonly Bar $bar) {}
 
-    public function __invoke(Request $request, int $id): JsonResponse
+    public function __invoke(Request $request, int $barId): JsonResponse
     {
-        if ($id !== $this->bar->id) {
+        if ($barId !== $this->bar->id) {
             abort(404);
         }
 

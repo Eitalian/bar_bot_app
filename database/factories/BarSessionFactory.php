@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Bar;
 use App\Models\BarSession;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -15,7 +16,7 @@ final class BarSessionFactory extends Factory
     public function definition(): array
     {
         return [
-            'bar_id'     => 1,
+            'bar_id'     => app(Bar::class)->id,
             'started_at' => now(),
             'ended_at'   => null,
         ];

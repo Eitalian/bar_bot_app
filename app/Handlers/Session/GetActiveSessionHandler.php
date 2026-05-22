@@ -5,7 +5,6 @@ namespace App\Handlers\Session;
 use App\Models\Bar;
 use App\Models\BarSession;
 use App\Services\BarSchedule;
-use Carbon\CarbonImmutable;
 
 final class GetActiveSessionHandler
 {
@@ -16,16 +15,9 @@ final class GetActiveSessionHandler
 
     public function handle(): ?BarSession
     {
-        $session = BarSession::query()
-            ->where('bar_id', $this->bar->id)
-            ->whereNull('ended_at')
-            ->first();
+        $session = BarSession::findOpen($this->bar->id);
 
-        if ($session === null) {
-            return null;
-        }
-
-        return $this->schedule->isInWindow($session->started_at, CarbonImmutable::now())
+        return $session && $this->schedule->isInWindow($session->started_at)
             ? $session
             : null;
     }

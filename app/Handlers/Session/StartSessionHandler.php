@@ -22,14 +22,9 @@ final class StartSessionHandler
     {
         $now = CarbonImmutable::now();
 
-        if (! $this->schedule->canOpenAt($now)) {
-            throw new BarClosedException();
-        }
+        throw_unless($this->schedule->canOpenAt($now), BarClosedException::class);
 
-        $active = BarSession::query()
-            ->where('bar_id', $this->bar->id)
-            ->whereNull('ended_at')
-            ->first();
+        $active = BarSession::findOpen($this->bar->id);
 
         if ($active && $this->schedule->isInWindow($active->started_at, $now)) {
             return $active; // идемпотентность
@@ -52,10 +47,7 @@ final class StartSessionHandler
             // Гонка: конкурент создал активную сессию между SELECT и INSERT;
             // partial unique index uq_bar_sessions_active отклонил вставку.
             // Возвращаем сессию-победителя (победитель уже поставил свою CloseSessionJob).
-            $winner = BarSession::query()
-                ->where('bar_id', $this->bar->id)
-                ->whereNull('ended_at')
-                ->first();
+            $winner = BarSession::findOpen($this->bar->id);
 
             if ($winner && $this->schedule->isInWindow($winner->started_at, $now)) {
                 return $winner;

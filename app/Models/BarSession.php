@@ -20,4 +20,12 @@ final class BarSession extends Model
         'started_at' => 'immutable_datetime',
         'ended_at'   => 'immutable_datetime',
     ];
+
+    public static function findOpen(int $barId): ?static
+    {
+        return static::query()
+            ->where('bar_id', $barId)
+            ->whereNull('ended_at')
+            ->first();
+    }
 }

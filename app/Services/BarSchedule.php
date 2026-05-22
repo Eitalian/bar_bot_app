@@ -14,9 +14,9 @@ final class BarSchedule
      * Возвращает [start, end) текущего рабочего окна или null, если сейчас бар закрыт.
      * Окно может проходить через полночь — start от вчерашней даты.
      */
-    public function currentWindow(?CarbonInterface $now = null): ?array
+    public function currentWindow(CarbonInterface $now = new CarbonImmutable()): ?array
     {
-        $now = $now ? CarbonImmutable::instance($now) : CarbonImmutable::now();
+        $now = CarbonImmutable::instance($now);
 
         // Кандидат-окно, начинающееся сегодня.
         $startToday = $this->buildBoundary($now->toDateString(), $this->bar->workStart);
@@ -57,24 +57,24 @@ final class BarSchedule
         return ['start' => $start, 'end' => $this->endAfter($start)];
     }
 
-    public function isInWindow(CarbonInterface $startedAt, ?CarbonInterface $now = null): bool
+    public function isInWindow(CarbonInterface $startedAt, CarbonInterface $now = new CarbonImmutable()): bool
     {
-        $now = $now ? CarbonImmutable::instance($now) : CarbonImmutable::now();
+        $now = CarbonImmutable::instance($now);
         $window = $this->windowFor($startedAt);
 
         return $now->greaterThanOrEqualTo($window['start']) && $now->lessThan($window['end']);
     }
 
-    public function canOpenAt(CarbonInterface $now): bool
+    public function canOpenAt(CarbonInterface $now = new CarbonImmutable()): bool
     {
+        $now = CarbonImmutable::instance($now);
         $window = $this->currentWindow($now);
+
         if ($window === null) {
             return false;
         }
 
-        $cutoff = $window['end']->subMinutes($this->bar->openCutoffMinutes);
-
-        return CarbonImmutable::instance($now)->lessThan($cutoff);
+        return $now->lessThan($window['end']->subMinutes($this->bar->openCutoffMinutes));
     }
 
     public function expectedEndAt(CarbonInterface $startedAt): CarbonImmutable
