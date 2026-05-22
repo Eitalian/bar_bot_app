@@ -11,7 +11,7 @@ final class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Models\Bar::class, fn() => \App\Models\Bar::default());
     }
 
     /**

@@ -20,6 +20,7 @@ final class StartAction
             ->addRow(
                 InlineKeyboardButton::make('🎛 Фильтры', callback_data: 'cmd:filter'),
                 InlineKeyboardButton::make('📦 Инвентарь', callback_data: 'inventory:show'),
+                InlineKeyboardButton::make('🍸 Сессия', callback_data: 'cmd:session'),
             );
 
         $bot->sendMessage(

@@ -6,6 +6,8 @@ use App\Actions\Inventory\InventoryAction;
 use App\Actions\Inventory\RemoveInventoryAction;
 use App\Actions\Search\BrowseRecipesAction;
 use App\Actions\Search\GetRecipeAction;
+use App\Actions\Session\SessionAction;
+use App\Actions\Session\StartSessionAction;
 use App\Actions\StartAction;
 use App\Middleware\CanManageMiddleware;
 use App\Telegram\Conversations\AddInventoryConversation;
@@ -43,3 +45,11 @@ $bot->onCallbackQueryData('recipe:show:{id}', [GetRecipeAction::class, 'fromTele
 $bot->onCallbackQueryData('browse:back', [StartAction::class, 'fromTelegram']);
 
 $bot->onCallbackQueryData('noop', fn(Nutgram $bot) => $bot->answerCallbackQuery());
+
+// Phase 3: Session
+$bot->onCommand('session', [SessionAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('cmd:session', [SessionAction::class, 'fromTelegram']);
+
+$bot->group(function (Nutgram $bot): void {
+    $bot->onCallbackQueryData('session:start', [StartSessionAction::class, 'fromTelegram']);
+})->middleware(CanManageMiddleware::class);

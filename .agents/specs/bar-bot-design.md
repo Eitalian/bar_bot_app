@@ -183,7 +183,7 @@ $bot->onPhoto([UploadPhotoAction::class, 'fromTelegram']);
 |---|---|
 | `User` | id, telegram_id (unique), first_name, username, created_at |
 | `BarInventory` | id, user_id (FK→users), ingredient_id (FK→ingredients), quantity, unit |
-| `BarSession` | id, started_at, ended_at (null = активная) |
+| `BarSession` | id (SMALLINT PK), bar_id, started_at, ended_at (null = активная); без timestamps |
 | `Order` | id, session_id, user_id, recipe_id, quantity (nullable), status: `pending\|accepted\|cancelled` |
 | `Favorite` | user_id, recipe_id (composite PK) |
 | `Rating` | user_id, recipe_id (composite PK), score (1–5) |
@@ -241,18 +241,27 @@ $bot->onPhoto([UploadPhotoAction::class, 'fromTelegram']);
 
 ---
 
-### Фаза 3 — Бар-сессия
+### Фаза 3 — Бар-сессия ✅ Готово
 
-Бармен открывает и закрывает сессию. Без активной сессии заказы невозможны.
+Бармен открывает сессию. Сессия автоматически закрывается в конце рабочего окна (12:00–06:00 через полночь). Без активной сессии заказы невозможны.
 
-**Telegram (только бармен):**
-- `/session` → показывает текущую сессию или кнопку "Старт"
-- Кнопка "Завершить сессию" → закрывает сессию (устанавливает `ended_at`)
+**Рабочее окно:** 12:00–06:00 (через полночь). Запрет открытия за `open_cutoff_minutes` (30 мин) до конца окна.
+
+**Бар как POPO singleton:** `Bar` — plain PHP object из `config/bar.php`, без таблицы в БД. Эволюция к мульти-бару — без переписывания consumers.
+
+**Telegram:**
+- `/session` и кнопка 🍸 Сессия в главном меню → показывает активную сессию (время старта, ожидаемое закрытие) или кнопку «🟢 Старт» (только для bartender/owner)
+- `callback_data: 'session:start'` под `CanManageMiddleware` → открывает сессию
 
 **HTTP API:**
-- `POST /api/sessions` — старт
-- `PATCH /api/sessions/{id}/end` — завершить
-- `GET /api/sessions/{id}` — детали сессии (заказы, итого)
+- `GET /api/bars/{id}/session` — активная сессия (200 с телом) или 204 если нет/протухла
+- `POST /api/bars/{id}/session` — старт сессии (201); 409 если бар закрыт; 404 если id не совпадает с config; требует `CanManageMiddleware`
+
+**Авто-закрытие:** при открытии создаётся `CloseSessionJob` с delay до 06:00 конца окна.
+
+**Self-healing:** при открытии новой сессии протухшая (из предыдущего окна) закрывается синхронно через `->handle()`.
+
+**DB-инвариант:** partial unique index `(bar_id) WHERE ended_at IS NULL` — одна активная сессия на бар.
 
 ---
 
