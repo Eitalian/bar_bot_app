@@ -16,8 +16,6 @@ final class BarSchedule
      */
     public function currentWindow(CarbonInterface $now = new CarbonImmutable()): ?array
     {
-        $now = CarbonImmutable::instance($now);
-
         // Кандидат-окно, начинающееся сегодня.
         $startToday = $this->buildBoundary($now->toDateString(), $this->bar->workStart);
         $endFromToday = $this->endAfter($startToday);
@@ -43,8 +41,6 @@ final class BarSchedule
      */
     public function windowFor(CarbonInterface $startedAt): array
     {
-        $startedAt = CarbonImmutable::instance($startedAt);
-
         // Окно начинается в ближайшее прошедшее workStart относительно startedAt.
         $startToday = $this->buildBoundary($startedAt->toDateString(), $this->bar->workStart);
 
@@ -59,7 +55,6 @@ final class BarSchedule
 
     public function isInWindow(CarbonInterface $startedAt, CarbonInterface $now = new CarbonImmutable()): bool
     {
-        $now = CarbonImmutable::instance($now);
         $window = $this->windowFor($startedAt);
 
         return $now->greaterThanOrEqualTo($window['start']) && $now->lessThan($window['end']);
@@ -67,7 +62,6 @@ final class BarSchedule
 
     public function canOpenAt(CarbonInterface $now = new CarbonImmutable()): bool
     {
-        $now = CarbonImmutable::instance($now);
         $window = $this->currentWindow($now);
 
         if ($window === null) {
