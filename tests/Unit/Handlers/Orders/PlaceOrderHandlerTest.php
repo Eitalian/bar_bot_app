@@ -2,6 +2,7 @@
 
 use App\Data\Orders\PlaceOrderData;
 use App\Enums\OrderStatus;
+use App\Exceptions\NoActiveSessionException;
 use App\Handlers\Orders\PlaceOrderHandler;
 use App\Models\BarSession;
 use App\Models\Recipe;
@@ -33,5 +34,5 @@ it('throws RuntimeException when no active session', function () {
 
     expect(fn () => app(PlaceOrderHandler::class)->handle(
         new PlaceOrderData(recipeId: $recipe->id, userId: $user->id)
-    ))->toThrow(\RuntimeException::class);
+    ))->toThrow(NoActiveSessionException::class);
 });

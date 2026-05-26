@@ -19,6 +19,8 @@ final class CancelOrderAction
             return;
         }
 
+        $bot->answerCallbackQuery();
+
         // Убрать кнопки из уведомления бармена
         $bot->editMessageReplyMarkup(reply_markup: InlineKeyboardMarkup::make());
 

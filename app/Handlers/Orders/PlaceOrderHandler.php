@@ -4,6 +4,7 @@ namespace App\Handlers\Orders;
 
 use App\Data\Orders\PlaceOrderData;
 use App\Enums\OrderStatus;
+use App\Exceptions\NoActiveSessionException;
 use App\Handlers\Session\GetActiveSessionHandler;
 use App\Models\Order;
 
@@ -18,7 +19,7 @@ final class PlaceOrderHandler
         $session = $this->sessionHandler->handle();
 
         if ($session === null) {
-            throw new \RuntimeException('Нет активной бар-сессии');
+            throw new NoActiveSessionException;
         }
 
         return Order::create([

@@ -3,6 +3,8 @@
 namespace App\Actions\Orders;
 
 use App\Data\Orders\PlaceOrderData;
+use App\Enums\UserRole;
+use App\Exceptions\NoActiveSessionException;
 use App\Models\User;
 use Illuminate\Support\Facades\Bus;
 use SergiX44\Nutgram\Nutgram;
@@ -18,16 +20,25 @@ final class PlaceOrderAction
                 recipeId: $id,
                 userId:   $bot->userId(),
             ));
-        } catch (\RuntimeException) {
+        } catch (NoActiveSessionException) {
             $bot->answerCallbackQuery(text: '🚫 Нет активной сессии');
             return;
         }
 
         $order->load('recipe', 'user');
 
-        $managers = User::all()->filter(fn (User $u) => $u->role->canManage());
+        $bot->answerCallbackQuery(text: 'Заказ отправлен! 🍸');
+        $bot->editMessageReplyMarkup(
+            reply_markup: InlineKeyboardMarkup::make()
+                ->addRow(
+                    InlineKeyboardButton::make('🔙 К поиску',   callback_data: 'browse:back'),
+                    InlineKeyboardButton::make('📋 Мои заказы', callback_data: 'orders:my'),
+                ),
+        );
+
         $recipe   = $order->recipe;
         $guest    = $order->user;
+        $managers = User::whereIn('role', [UserRole::Bartender->value, UserRole::Owner->value])->get();
 
         $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
@@ -42,22 +53,17 @@ final class PlaceOrderAction
             );
 
         foreach ($managers as $manager) {
-            $bot->sendMessage(
-                text: "🍹 *Новый заказ*\n\nКоктейль: {$recipe->name_ru}\nГость: {$guest->first_name}" .
-                      ($guest->username ? " (@{$guest->username})" : ''),
-                chat_id:      $manager->telegram_id,
-                parse_mode:   'Markdown',
-                reply_markup: $keyboard,
-            );
+            try {
+                $bot->sendMessage(
+                    text: "🍹 *Новый заказ*\n\nКоктейль: {$recipe->name_ru}\nГость: {$guest->first_name}" .
+                          ($guest->username ? " (@{$guest->username})" : ''),
+                    chat_id:      $manager->telegram_id,
+                    parse_mode:   'Markdown',
+                    reply_markup: $keyboard,
+                );
+            } catch (\Throwable) {
+                // Не прерываем рассылку если один из менеджеров заблокировал бота
+            }
         }
-
-        $bot->answerCallbackQuery(text: 'Заказ отправлен! 🍸');
-        $bot->editMessageReplyMarkup(
-            reply_markup: InlineKeyboardMarkup::make()
-                ->addRow(
-                    InlineKeyboardButton::make('🔙 К поиску',   callback_data: 'browse:back'),
-                    InlineKeyboardButton::make('📋 Мои заказы', callback_data: 'orders:my'),
-                ),
-        );
     }
 }

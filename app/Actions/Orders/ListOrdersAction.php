@@ -2,6 +2,7 @@
 
 namespace App\Actions\Orders;
 
+use App\Enums\OrderStatus;
 use App\Handlers\Orders\ListGuestOrdersHandler;
 use App\Models\BarSession;
 use App\Models\Order;
@@ -41,10 +42,10 @@ final class ListOrdersAction
         }
 
         $lines = $orders->map(function ($order) {
-            $icon = match ($order->status->value) {
-                'accepted'  => "✅ ×{$order->quantity}",
-                'cancelled' => '❌',
-                default     => '⏳',
+            $icon = match ($order->status) {
+                OrderStatus::Accepted  => "✅ ×{$order->quantity}",
+                OrderStatus::Cancelled => '❌',
+                default                => '⏳',
             };
             return "• {$order->recipe->name_ru} — {$icon}";
         })->join("\n");

@@ -11,7 +11,7 @@ final class AcceptOrderHandler
 {
     public function handle(AcceptOrderData $data): Order
     {
-        $order = Order::with('user', 'recipe')->findOrFail($data->orderId);
+        $order = Order::findOrFail($data->orderId);
 
         if ($order->status !== OrderStatus::Pending) {
             throw new OrderAlreadyProcessedException;

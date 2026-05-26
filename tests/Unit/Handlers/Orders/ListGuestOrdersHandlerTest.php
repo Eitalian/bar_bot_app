@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\OrderStatus;
 use App\Handlers\Orders\ListGuestOrdersHandler;
 use App\Models\BarSession;
 use App\Models\Order;
