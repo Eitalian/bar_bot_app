@@ -18,7 +18,7 @@
 | 1.1 | Роли и контроль доступа (guest/bartender/owner) | ✅ Готово |
 | 2 | Поиск рецептов (Telegram + HTTP API) | ✅ Готово |
 | 3 | Бар-сессии | ✅ Готово |
-| 3.1 | Заказы коктейлей | ⏳ Не начато |
+| 3.1 | Заказы коктейлей | ✅ Готово |
 | 4 | Избранное и оценки | ⏳ Не начато |
 | 5 | Загрузка фото | ⏳ Не начато |
 | 6 | Форк коктейля | ⏳ Не начато |
@@ -96,8 +96,11 @@ $item = Bus::dispatch(new AddInventoryData(...));
 
 ```php
 $this->app->make(Dispatcher::class)->map([
-    AddInventoryData::class => AddInventoryHandler::class,
+    AddInventoryData::class    => AddInventoryHandler::class,
     RemoveInventoryData::class => RemoveInventoryHandler::class,
+    PlaceOrderData::class      => PlaceOrderHandler::class,   // Phase 3.1
+    AcceptOrderData::class     => AcceptOrderHandler::class,  // Phase 3.1
+    CancelOrderData::class     => CancelOrderHandler::class,  // Phase 3.1
 ]);
 ```
 
@@ -243,6 +246,14 @@ onCallbackQueryData('cmd:session')        → SessionAction::fromTelegram
 
 Group [CanManageMiddleware]:
   onCallbackQueryData('session:start')    → StartSessionAction::fromTelegram
+
+// Phase 3.1 (активны):
+onCallbackQueryData('recipe:order:{id}')         → PlaceOrderAction::fromTelegram
+onCallbackQueryData('orders:my')                 → ListOrdersAction::fromTelegram
+
+Group [CanManageMiddleware]:
+  onCallbackQueryData('order:qty:{id}:{n}')      → AcceptOrderAction::fromTelegram
+  onCallbackQueryData('order:cancel:{id}')       → CancelOrderAction::fromTelegram
 ```
 
 ### Кнопки главного меню (StartAction)
@@ -253,6 +264,7 @@ Group [CanManageMiddleware]:
 🎛 Фильтры            → callback_data: 'cmd:filter'
 📦 Инвентарь          → callback_data: 'inventory:show'
 🍸 Сессия             → callback_data: 'cmd:session'
+📋 Мои заказы         → callback_data: 'orders:my'   (только при активной сессии)
 ```
 
 ---
@@ -271,6 +283,9 @@ GET    /api/recipes/{id}           → GetRecipeAction        (без auth)
 
 GET    /api/bars/{id}/session      → SessionAction          [auth.telegram]
 POST   /api/bars/{id}/session      → StartSessionAction     [auth.telegram + CanManageMiddleware]
+
+GET    /api/sessions/{id}/orders   → ListOrdersAction       [auth.telegram + CanManageMiddleware]
+PATCH  /api/orders/{id}            → UpdateOrderAction      [auth.telegram + CanManageMiddleware]
 ```
 
 **Как работает `auth.telegram` middleware**: ищет `User` по `telegram_id` из query-параметра. Если не найден → 404. Используется в тестах как `?telegram_id={$user->telegram_id}`.
@@ -331,6 +346,40 @@ $session->ended_at === null  // активная сессия
 ```
 
 `StartSessionHandler` идемпотентен под гонкой: после `SELECT active` (нет) → `create()` партиал-индекс может отклонить вставку, если конкурент успел открыть сессию первым. `catch (QueryException)` делает re-SELECT и возвращает сессию-победителя (её `CloseSessionJob` уже поставлен), не диспатча дубль-джобу. Если активной в окне нет — исключение пробрасывается.
+
+### Order
+
+```php
+// PK: BIGINT auto-increment ($incrementing = true, default)
+// Fillable: session_id, user_id, recipe_id, quantity, status
+// Casts: status→OrderStatus, quantity→'integer'
+// $timestamps = true (created_at/updated_at)
+
+$order->session()  // BelongsTo BarSession
+$order->user()     // BelongsTo User
+$order->recipe()   // BelongsTo Recipe
+
+// После update() отношения НЕ перезагружаются — использовать fresh(), а не refresh():
+$order = $order->fresh(['user', 'recipe']); // ✅ новый экземпляр с загруженными relations
+$order->refresh();                           // ❌ relations не перезагружает после update()
+```
+
+### OrderStatus enum
+
+```php
+// app/Enums/OrderStatus.php
+OrderStatus::Pending   // 'pending'  — создан, ожидает бармена
+OrderStatus::Accepted  // 'accepted' — принят, бармен указал quantity
+OrderStatus::Cancelled // 'cancelled'— отклонён барменом
+```
+
+### OrderFactory
+
+```php
+Order::factory()->create()            // status = Pending, quantity = null
+Order::factory()->accepted()->create() // status = Accepted, quantity = 2
+Order::factory()->cancelled()->create() // status = Cancelled
+```
 
 ### RecipeIngredient
 
@@ -430,7 +479,15 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 
 7. **Авто-закрытие бар-сессии** — при старте создаётся `CloseSessionJob` с delay до конца рабочего окна (06:00). Выполняется воркером из контейнера `queue`. Self-healing: при старте новой сессии протухшая (из предыдущего окна) закрывается синхронно через `->handle()`, минуя диспетчер — это гарантирует корректную работу даже с `Queue::fake()` в тестах.
 
-8. **`orders.session_id` без FK после Phase 3** — миграция `2026_05_10_000001_create_bar_sessions_table` делает `DROP TABLE bar_sessions CASCADE`, что заодно сносит FK `fk_orders_session_id` из таблицы-заглушки `orders`. Итог: `orders.session_id` остаётся `BIGINT` **без** FK, тогда как новый `bar_sessions.id` — `SMALLINT`. Phase 4 (orders), восстанавливая связь, обязана `ALTER COLUMN orders.session_id TYPE SMALLINT` перед добавлением FK на `bar_sessions(id)`.
+8. **`orders.session_id` — SMALLINT с FK** — Phase 3.1 добавила миграцию `2026_05_26_000001_alter_orders_add_session_fk`, которая `ALTER COLUMN orders.session_id TYPE SMALLINT USING session_id::SMALLINT` и восстанавливает FK на `bar_sessions(id)`. Проблема, описанная до Phase 3.1, решена.
+
+9. **Push-уведомления через `sendMessage` с явным `chat_id`** — для уведомления конкретного пользователя используется `$bot->sendMessage(chat_id: $user->telegram_id, text: ...)`. Это работает потому что `chat_id` у личных чатов совпадает с `telegram_id` пользователя. Паттерн применяется в `PlaceOrderAction` (уведомление всех барменов) и `AcceptOrderAction`/`CancelOrderAction` (уведомление гостя). Каждый вызов в цикле оборачивается в `try/catch(\Throwable)` — если бот заблокирован у конкретного менеджера, цикл продолжается.
+
+10. **Идемпотентность заказов через `OrderAlreadyProcessedException`** — `AcceptOrderHandler` и `CancelOrderHandler` проверяют `$order->status !== OrderStatus::Pending` и бросают `OrderAlreadyProcessedException`. В Telegram: `answerCallbackQuery` с текстом ошибки. По HTTP: 409 Conflict.
+
+11. **`NoActiveSessionException`** — `PlaceOrderHandler` бросает его при отсутствии активной сессии. `PlaceOrderAction` ловит именно его (не широкий `RuntimeException`) и показывает `answerCallbackQuery` с сообщением гостю.
+
+12. **Порядок вызовов в Telegram callback-обработчиках** — `answerCallbackQuery()` и `editMessageReplyMarkup()` нужно вызывать **до** любых `sendMessage` в цикле. Иначе спиннер у кнопки «зависнет» пока не придёт ответ от Telegram (или пока бот не получит timeout от заблокировавшего менеджера).
 
 ---
 
@@ -449,8 +506,8 @@ $ids = (new BrowseContext)->get($key); // string[]|null
 
 - **SearchRecipesAction** — `__invoke` для HTTP `/api/recipes` и `fromTelegram(Nutgram, SearchRecipesData)` для Telegram. Выбирает header по наличию `$data->q` («поиск» vs «фильтрация»). Используется из `FilterConversation` и `SearchByNameConversation`.
 - **SearchByIngredientAction** — `fromTelegram(Nutgram, SearchByIngredientData)`. Action limited Telegram-only (HTTP-эндпоинта пока нет). Использует `SearchByIngredientHandler`, рендерит до 10 рецептов + overflow «и ещё N».
-- **GetRecipeAction** — `__invoke` для HTTP `/api/recipes/{id}` + `fromTelegram(Nutgram, string $id)` для одиночного отображения карточки (`editMessageText` + кнопка «🔙 К поиску»).
-- **BrowseRecipesAction** — `fromTelegram(Nutgram, string $browseKey, int $pos)`. Маршрут `recipe:browse:{browseKey}:{pos}`. Читает IDs из `BrowseContext`, строит клавиатуру с навигацией ◀️/▶️, «🔙 К поиску», «🛒 Заказать» / «🍴 Форкнуть» (noop). При просроченном контексте → `answerCallbackQuery` с текстом ошибки.
+- **GetRecipeAction** — `__invoke` для HTTP `/api/recipes/{id}` + `fromTelegram(Nutgram, string $id)` для одиночного отображения карточки (`editMessageText` + кнопка «🔙 К поиску» + кнопка «🛒 Заказать» если сессия активна).
+- **BrowseRecipesAction** — `fromTelegram(Nutgram, string $browseKey, int $pos)`. Маршрут `recipe:browse:{browseKey}:{pos}`. Читает IDs из `BrowseContext`, строит клавиатуру с навигацией ◀️/▶️, «🔙 К поиску», «🛒 Заказать» (если сессия активна) + «🍴 Форкнуть» (noop). При просроченном контексте → `answerCallbackQuery` с текстом ошибки.
 - **StartAction** (`app/Actions/StartAction.php`) — `fromTelegram(Nutgram)`. Рендерит главное меню. Используется для `/start` и для `browse:back` (возврат в меню из карточки рецепта).
 
 ## SearchResultsResponse (app/Telegram/Responses/SearchResultsResponse.php)
