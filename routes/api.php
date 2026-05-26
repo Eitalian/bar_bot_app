@@ -3,6 +3,8 @@
 use App\Actions\Inventory\AddInventoryAction;
 use App\Actions\Inventory\InventoryAction;
 use App\Actions\Inventory\RemoveInventoryAction;
+use App\Actions\Orders\ListOrdersAction;
+use App\Actions\Orders\UpdateOrderAction;
 use App\Actions\Search\GetRecipeAction;
 use App\Actions\Search\SearchRecipesAction;
 use App\Actions\Session\SessionAction;
@@ -30,4 +32,8 @@ Route::middleware('auth.telegram')->group(function () {
     Route::middleware(CanManageMiddleware::class)->group(function () {
         Route::post('/bars/{id}/session', StartSessionAction::class);
     });
+
+    // Phase 3.1: Orders
+    Route::get('/sessions/{id}/orders', ListOrdersAction::class);
+    Route::patch('/orders/{id}', UpdateOrderAction::class);
 });

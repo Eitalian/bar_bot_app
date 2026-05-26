@@ -4,6 +4,10 @@
 
 use App\Actions\Inventory\InventoryAction;
 use App\Actions\Inventory\RemoveInventoryAction;
+use App\Actions\Orders\AcceptOrderAction;
+use App\Actions\Orders\CancelOrderAction;
+use App\Actions\Orders\ListOrdersAction;
+use App\Actions\Orders\PlaceOrderAction;
 use App\Actions\Search\BrowseRecipesAction;
 use App\Actions\Search\GetRecipeAction;
 use App\Actions\Session\SessionAction;
@@ -52,4 +56,13 @@ $bot->onCallbackQueryData('cmd:session', [SessionAction::class, 'fromTelegram'])
 
 $bot->group(function (Nutgram $bot): void {
     $bot->onCallbackQueryData('session:start', [StartSessionAction::class, 'fromTelegram']);
+})->middleware(CanManageMiddleware::class);
+
+// Phase 3.1: Orders
+$bot->onCallbackQueryData('recipe:order:{id}', [PlaceOrderAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('orders:my', [ListOrdersAction::class, 'fromTelegram']);
+
+$bot->group(function (Nutgram $bot): void {
+    $bot->onCallbackQueryData('order:qty:{id}:{n}', [AcceptOrderAction::class, 'fromTelegram']);
+    $bot->onCallbackQueryData('order:cancel:{id}', [CancelOrderAction::class, 'fromTelegram']);
 })->middleware(CanManageMiddleware::class);

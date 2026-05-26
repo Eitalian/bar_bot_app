@@ -16,11 +16,11 @@ it('GET /api/sessions/{id}/orders returns orders for session', function () {
     $this->getJson("/api/sessions/{$session->id}/orders?telegram_id={$user->telegram_id}")
         ->assertOk()
         ->assertJsonCount(3);
-})->skip('routes registered in T6');
+});
 
 it('GET returns 404 for unknown session', function () {
     $user = User::factory()->bartender()->create();
 
     $this->getJson("/api/sessions/9999/orders?telegram_id={$user->telegram_id}")
         ->assertNotFound();
-})->skip('routes registered in T6');
+});

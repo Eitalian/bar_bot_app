@@ -2,12 +2,15 @@
 
 namespace App\Actions;
 
+use App\Handlers\Session\GetActiveSessionHandler;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 final class StartAction
 {
+    public function __construct(private GetActiveSessionHandler $sessionHandler) {}
+
     public function fromTelegram(Nutgram $bot): void
     {
         $name = $bot->user()?->first_name ?? 'друг';
@@ -22,6 +25,12 @@ final class StartAction
                 InlineKeyboardButton::make('📦 Инвентарь', callback_data: 'inventory:show'),
                 InlineKeyboardButton::make('🍸 Сессия', callback_data: 'cmd:session'),
             );
+
+        if ($this->sessionHandler->handle() !== null) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make('📋 Мои заказы', callback_data: 'orders:my'),
+            );
+        }
 
         $bot->sendMessage(
             text: "👋 Привет, {$name}!\n\n"
