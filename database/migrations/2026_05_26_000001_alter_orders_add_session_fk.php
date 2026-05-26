@@ -12,7 +12,7 @@ return new class extends Migration
             -- который снёс fk_orders_session_id из заглушки orders.
             -- Восстанавливаем FK; тип колонки приводим к SMALLINT для совместимости.
             ALTER TABLE orders
-                ALTER COLUMN session_id TYPE SMALLINT;
+                ALTER COLUMN session_id TYPE SMALLINT USING session_id::SMALLINT;
 
             ALTER TABLE orders
                 ADD CONSTRAINT fk_orders_session_id
