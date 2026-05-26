@@ -31,9 +31,9 @@ Route::middleware('auth.telegram')->group(function () {
 
     Route::middleware(CanManageMiddleware::class)->group(function () {
         Route::post('/bars/{id}/session', StartSessionAction::class);
-    });
 
-    // Phase 3.1: Orders
-    Route::get('/sessions/{id}/orders', ListOrdersAction::class);
-    Route::patch('/orders/{id}', UpdateOrderAction::class);
+        // Phase 3.1: Orders (manager-only)
+        Route::get('/sessions/{id}/orders', ListOrdersAction::class);
+        Route::patch('/orders/{id}', UpdateOrderAction::class);
+    });
 });

@@ -42,6 +42,15 @@ it('PATCH returns 409 when order already processed', function () {
     ])->assertStatus(409);
 });
 
+it('PATCH returns 403 when caller is a guest', function () {
+    $guest = User::factory()->create();
+    $order = Order::factory()->create();
+
+    $this->patchJson("/api/orders/{$order->id}?telegram_id={$guest->telegram_id}", [
+        'status' => 'accepted',
+    ])->assertForbidden();
+});
+
 it('GET /api/sessions/{id}/orders returns all orders', function () {
     CarbonImmutable::setTestNow('2026-05-26 18:00:00');
     $bartender = User::factory()->bartender()->create();
