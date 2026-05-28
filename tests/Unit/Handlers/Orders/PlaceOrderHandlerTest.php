@@ -18,14 +18,14 @@ it('creates a pending order in active session', function () {
     $recipe  = Recipe::factory()->create();
 
     $order = app(PlaceOrderHandler::class)->handle(
-        new PlaceOrderData(recipeId: $recipe->id, userId: $user->id)
+        new PlaceOrderData(recipeId: $recipe->id, userId: $user->id, quantity: 2)
     );
 
     expect($order->status)->toBe(OrderStatus::Pending)
         ->and($order->session_id)->toBe($session->id)
         ->and($order->user_id)->toBe($user->id)
         ->and($order->recipe_id)->toBe($recipe->id)
-        ->and($order->quantity)->toBeNull();
+        ->and($order->quantity)->toBe(2);
 });
 
 it('throws RuntimeException when no active session', function () {
@@ -33,6 +33,6 @@ it('throws RuntimeException when no active session', function () {
     $recipe = Recipe::factory()->create();
 
     expect(fn () => app(PlaceOrderHandler::class)->handle(
-        new PlaceOrderData(recipeId: $recipe->id, userId: $user->id)
+        new PlaceOrderData(recipeId: $recipe->id, userId: $user->id, quantity: 1)
     ))->toThrow(NoActiveSessionException::class);
 });

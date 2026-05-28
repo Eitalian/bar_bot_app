@@ -27,7 +27,7 @@ final class PlaceOrderHandler
             'user_id'    => $data->userId,
             'recipe_id'  => $data->recipeId,
             'status'     => OrderStatus::Pending,
-            'quantity'   => null,
+            'quantity'   => $data->quantity,
         ]);
     }
 }

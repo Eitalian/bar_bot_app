@@ -24,6 +24,7 @@ final class ListGuestOrdersHandler
         return Order::with('recipe')
             ->where('session_id', $session->id)
             ->where('user_id', $userId)
+            ->orderByRaw("CASE status WHEN 'accepted' THEN 1 WHEN 'cancelled' THEN 2 ELSE 3 END")
             ->orderBy('created_at')
             ->get();
     }

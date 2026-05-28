@@ -9,5 +9,6 @@ final class PlaceOrderData extends Data
     public function __construct(
         public readonly string $recipeId,
         public readonly int $userId,
+        public readonly int $quantity = 1,
     ) {}
 }
