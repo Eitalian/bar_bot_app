@@ -3,6 +3,7 @@
 namespace App\Actions\Search;
 
 use App\Handlers\Search\GetRecipeHandler;
+use App\Handlers\Session\GetActiveSessionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use SergiX44\Nutgram\Nutgram;
@@ -11,7 +12,10 @@ use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
 final class GetRecipeAction
 {
-    public function __construct(private GetRecipeHandler $handler) {}
+    public function __construct(
+        private GetRecipeHandler $handler,
+        private GetActiveSessionHandler $sessionHandler,
+    ) {}
 
     public function __invoke(Request $request, string $id): JsonResponse
     {
@@ -38,6 +42,12 @@ final class GetRecipeAction
             ->addRow(
                 InlineKeyboardButton::make('🔙 К поиску', callback_data: 'browse:back'),
             );
+
+        if ($this->sessionHandler->handle() !== null) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:order:{$recipe->id}"),
+            );
+        }
 
         $bot->editMessageText(
             text: $recipe->toTelegramMessage(),
