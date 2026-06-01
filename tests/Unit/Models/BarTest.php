@@ -1,19 +1,21 @@
 <?php
 
 use App\Models\Bar;
+use Illuminate\Support\Facades\DB;
 
-it('reads attributes from config', function () {
-    config(['bar.id' => 7]);
-    config(['bar.name' => 'TestBar']);
-    config(['bar.working_hours.start' => '15:00']);
-    config(['bar.working_hours.end' => '03:00']);
-    config(['bar.open_cutoff_minutes' => 45]);
+it('reads attributes from the bars table', function () {
+    DB::table('bars')->update([
+        'name'                => 'TestBar',
+        'work_start'          => '15:00',
+        'work_end'            => '03:00',
+        'open_cutoff_minutes' => 45,
+    ]);
 
     $bar = Bar::default();
 
-    expect($bar->id)->toBe(7)
-        ->and($bar->name)->toBe('TestBar')
+    expect($bar->name)->toBe('TestBar')
         ->and($bar->workStart)->toBe('15:00')
         ->and($bar->workEnd)->toBe('03:00')
-        ->and($bar->openCutoffMinutes)->toBe(45);
+        ->and($bar->openCutoffMinutes)->toBe(45)
+        ->and($bar->id)->toBeInt();
 });
