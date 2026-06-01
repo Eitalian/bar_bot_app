@@ -105,24 +105,28 @@ $this->app->make(Dispatcher::class)->map([
 
 ---
 
-## Bar (app/Models/Bar.php) — POPO singleton
+## Bar (app/Models/Bar.php) — POPO singleton, источник правды — таблица `bars`
 
-`Bar` — plain PHP object без таблицы в БД. Строится из `config/bar.php`.
+`Bar` — readonly value-object (POPO), **гидрируется из таблицы `bars`** (не Eloquent-модель). С BB-8 источник правды — БД, а не `config/bar.php` (в конфиге осталась только `bar.search.per_page`).
 
 ```php
 // Разрешается через DI (singleton зарегистрирован в AppServiceProvider):
 $bar = app(Bar::class); // всегда один экземпляр
 
 // Фабричный метод (используется при регистрации):
-$bar = Bar::default(); // читает config('bar.*')
+$bar = Bar::default(); // читает единственную строку из bars (orderBy id), маппит в POPO
 
-// Поля:
-$bar->id               // int, совпадает с config('bar.id') = 1
+// Поля (TIME из БД нормализуется к 'HH:MM'):
+$bar->id               // int (SMALLINT PK)
 $bar->name             // string
 $bar->workStart        // string '12:00'
 $bar->workEnd          // string '06:00' (через полночь)
 $bar->openCutoffMinutes // int, 30
 ```
+
+Таблица `bars`: `id SMALLINT IDENTITY`, `owner_id BIGINT → users ON DELETE RESTRICT` (владельца не удалить), `name`, `work_start/work_end TIME`, `open_cutoff_minutes SMALLINT`. Сидируется одна строка + плейсхолдер-владелец (`telegram_id = 0`, role `owner`) в миграции `2026_06_01_000001`.
+
+⚠️ Octane: singleton живёт всю жизнь воркера — правка строки `bars` подхватится только после рестарта воркера.
 
 Эволюция к мульти-бару — без переписывания consumers: singleton меняется на коллекцию, Action принимает `{id}` из маршрута и выбирает нужный экземпляр.
 
@@ -297,7 +301,8 @@ $recipe->toTelegramMessage() // форматирует карточку реце
 
 ```php
 // Fillable: ingredient_id, quantity (float|null), unit (string|null)
-// НЕТ user_id — инвентарь общий для всего бара (не per-user)
+// НЕТ user_id — инвентарь не per-user. С BB-8 привязан к бару: bar_id SMALLINT → bars ON DELETE CASCADE,
+//   UNIQUE(bar_id, ingredient_id). bar_id имеет DEFAULT 1, в $fillable не добавлен (один бар).
 $inventory->ingredient() // BelongsTo Ingredient
 ```
 
@@ -327,6 +332,7 @@ UserRole::Owner     // canManage() → true
 // Fillable: bar_id, started_at, ended_at
 // Casts: bar_id→integer, started_at→CarbonImmutable, ended_at→CarbonImmutable|null
 // Partial unique index: uq_bar_sessions_active (bar_id) WHERE ended_at IS NULL — гарантирует одну активную сессию на бар
+// С BB-8: bar_id → bars ON DELETE CASCADE (FK-индекс опущен — таблица крошечная)
 $session->ended_at === null  // активная сессия
 ```
 
@@ -420,7 +426,7 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 
 2. **`ing:add:{id}` callbacks** (SearchByIngredientConversation) — когда найдено несколько ингредиентов, conversation показывает кнопки с `ing:add:{id}`. Шаг `handleIngredient` читает `$bot->message()->text`, а не callback_data — при нажатии кнопки `text` будет `null`, поиск выполнится по пустой строке. Известный баг, не мешает основному флоу.
 
-3. **Инвентарь без `user_id`** — `bar_inventory` не привязан к пользователю. Инвентарь общий для всего бара. `InventoryAction::fromTelegram` и `ListInventoryHandler` возвращают всё без фильтрации.
+3. **Инвентарь без `user_id`** — `bar_inventory` не привязан к пользователю. Инвентарь принадлежит бару (`bar_id`, BB-8). `InventoryAction::fromTelegram` и `ListInventoryHandler` пока возвращают всё без фильтрации по `bar_id` (один бар).
 
 4. **`recipes` таблица** — уже заполнена 203 рецептами через `bar:import`. При `migration:fresh` данные теряются — нужен повторный `bar:import`.
 
