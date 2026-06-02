@@ -14,6 +14,7 @@ RUN apt update \
         nodejs \
         npm \
         supervisor \
+        mawk \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # PHP расширения
@@ -35,7 +36,7 @@ RUN npm install --save-dev chokidar
 
 # Права и лог-файлы для supervisor
 RUN chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true \
-    && touch storage/logs/octane.log storage/logs/worker.log storage/logs/scheduler.log \
-    && chown www-data:www-data storage/logs/octane.log storage/logs/worker.log storage/logs/scheduler.log
+    && touch storage/logs/octane.log storage/logs/worker.log storage/logs/scheduler.log storage/logs/nutgram.log \
+    && chown www-data:www-data storage/logs/octane.log storage/logs/worker.log storage/logs/scheduler.log storage/logs/nutgram.log
 
 EXPOSE 8080
