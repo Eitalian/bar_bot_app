@@ -3,6 +3,7 @@
 namespace App\Actions\Search;
 
 use App\Handlers\Search\GetRecipeHandler;
+use App\Handlers\Session\GetActiveSessionHandler;
 use App\Services\BrowseContext;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -13,6 +14,7 @@ final class BrowseRecipesAction
     public function __construct(
         private GetRecipeHandler $recipeHandler,
         private BrowseContext $browseContext,
+        private GetActiveSessionHandler $sessionHandler,
     ) {}
 
     public function fromTelegram(Nutgram $bot, string $browseKey, int $pos): void
@@ -64,10 +66,11 @@ final class BrowseRecipesAction
             InlineKeyboardButton::make('🔙 К поиску', callback_data: 'browse:back'),
         );
 
-        $keyboard->addRow(
-            InlineKeyboardButton::make('🛒 Заказать', callback_data: 'noop'),
-            InlineKeyboardButton::make('🍴 Форкнуть', callback_data: 'noop'),
-        );
+        $actionRow = [InlineKeyboardButton::make('🍴 Форкнуть', callback_data: 'noop')];
+        if ($this->sessionHandler->handle() !== null) {
+            array_unshift($actionRow, InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:order:{$id}"));
+        }
+        $keyboard->addRow(...$actionRow);
 
         $bot->editMessageText(
             text: $recipe->toTelegramMessage(),
