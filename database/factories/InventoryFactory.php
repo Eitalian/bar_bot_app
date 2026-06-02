@@ -13,6 +13,7 @@ final class InventoryFactory extends Factory
     public function definition(): array
     {
         return [
+            'bar_id' => 1,
             'ingredient_id' => Ingredient::factory(),
             'quantity' => $this->faker->optional()->randomFloat(2, 0.1, 1000),
             'unit' => $this->faker->optional()->randomElement(['мл', 'г', 'шт', 'бутылка']),
