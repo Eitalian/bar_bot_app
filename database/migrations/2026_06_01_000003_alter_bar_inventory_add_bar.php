@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         DB::unprepared(/** @lang PostgreSQL */ "
@@ -12,7 +11,7 @@ return new class extends Migration
             -- Данных нет — DEFAULT 1 + смена UNIQUE безопасны.
             -- FK-индекс на bar_id не нужен: он ведущая колонка нового UNIQUE(bar_id, ingredient_id).
             ALTER TABLE bar_inventory
-                ADD COLUMN bar_id SMALLINT NOT NULL DEFAULT 1,
+                ADD COLUMN bar_id SMALLINT NOT NULL,
                 DROP CONSTRAINT IF EXISTS uq_bar_inventory_ingredient_id,
                 ADD CONSTRAINT fk_bar_inventory_bar_id
                     FOREIGN KEY (bar_id) REFERENCES bars (id) ON DELETE CASCADE,
