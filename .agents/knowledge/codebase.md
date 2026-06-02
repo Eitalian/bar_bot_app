@@ -304,7 +304,7 @@ PATCH  /api/orders/{id}            → UpdateOrderAction      [auth.telegram + C
 // String UUID PK (не incrementing)
 // Fillable: id, name_ru, name_en, description, instructions, glass, abv, volume, icon, photo, taste_tags
 // Casts: taste_tags→array, abv→float, volume→integer
-// HasFactory: НЕТ до Phase 2 (RecipeFactory создаётся в Task 1 Phase 2)
+// HasFactory: ДА. RecipeFactory с trait nonAlcoholic()
 
 $recipe->recipeIngredients() // HasMany RecipeIngredient, orderBy('sort_order')
 $recipe->ingredients()       // BelongsToMany Ingredient (через recipe_ingredients)
@@ -315,9 +315,10 @@ $recipe->toTelegramMessage() // форматирует карточку реце
 ### Inventory (таблица: bar_inventory)
 
 ```php
-// Fillable: ingredient_id, quantity (float|null), unit (string|null)
+// Fillable: bar_id, ingredient_id, quantity (float|null), unit (string|null)
 // НЕТ user_id — инвентарь не per-user. С BB-8 привязан к бару: bar_id SMALLINT → bars ON DELETE CASCADE,
-//   UNIQUE(bar_id, ingredient_id). bar_id имеет DEFAULT 1, в $fillable не добавлен (один бар).
+//   UNIQUE(bar_id, ingredient_id). bar_id = 1 (единственный бар) — в $fillable и InventoryFactory.
+// AddInventoryHandler.updateOrCreate ищет по (bar_id=1, ingredient_id).
 $inventory->ingredient() // BelongsTo Ingredient
 ```
 
@@ -466,6 +467,50 @@ Inventory::factory()->create(['ingredient_id' => $ing->id])
 Recipe::factory()->create(['name_ru' => 'Маргарита', 'glass' => 'margarita'])
 Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 ```
+
+---
+
+## Схема БД — аудит типов и индексов (BB-9, 2026-06-02)
+
+### Обоснования типов колонок
+
+| Таблица.колонка | Тип | Обоснование |
+|---|---|---|
+| `recipes.id` | `TEXT` | Slug + UUID-строки, смешанный формат. VARCHAR(N) не даёт пользы — TOAST-хранение одинаковое. |
+| `users.id` | `BIGINT IDENTITY` | Внутренний PK; BIGINT стандарт для Laravel auto-increment. |
+| `users.telegram_id` | `BIGINT` | Telegram UID ≤ 2^52 — BIGINT (8 байт, max ~9.2×10¹⁸) подходит. |
+| `bars.id`, `bar_sessions.id`, `bar_inventory.bar_id` | `SMALLINT` | Число баров и сессий заведомо мало; SMALLINT экономит место в FK. |
+| `bar_sessions.id` | `SMALLINT IDENTITY` | 32 767 значений ≈ 89 лет ежедневных сессий. |
+| `orders.id` | `BIGINT` | Растущая таблица заказов. |
+| `orders.session_id` | `SMALLINT` | Соответствует `bar_sessions.id` (после миграции 2026_05_26). |
+| `orders.quantity` | `SMALLINT` | 1–5 порций (Phase 3.1). CHECK `quantity IS NULL OR (quantity BETWEEN 1 AND 5)` добавлен BB-9. |
+| `ratings.score` | `SMALLINT` | Шкала 1–5 (Phase 4 design). CHECK `score BETWEEN 1 AND 5` добавлен BB-9. |
+| Строковые колонки (имена, glass, unit) | `VARCHAR(255)` | Разумный cap для коротких строк. |
+| Текстовые колонки (description, instructions, payload) | `TEXT` | Произвольная длина, без ограничений. |
+
+### FK-индексы (состояние после BB-9)
+
+PostgreSQL **не индексирует referencing-колонку FK автоматически**. Добавлено миграцией `2026_06_02_000001_schema_audit_fixes`:
+
+| Индекс | Покрывает |
+|---|---|
+| `idx_orders_recipe_id` | Поиск заказов по рецепту |
+| `idx_orders_session_id`, `idx_orders_user_id` | Добавлены миграцией 2026_05_26 |
+| `idx_favorites_recipe_id` | PK ведёт по user_id — recipe_id не покрыт |
+| `idx_ratings_recipe_id` | Аналогично favorites |
+| `idx_bar_inventory_ingredient_id` | UNIQUE ведёт по bar_id |
+| `idx_recipe_ingredients_recipe_id`, `idx_recipe_ingredients_ingredient_id` | Основная junction |
+| `idx_recipe_tags_recipe_id`, `idx_recipe_photos_recipe_id` | Все запросы по recipe_id |
+
+### Деferred: CASCADE → RESTRICT для 4 FK
+
+Четыре FK имеют `ON DELETE CASCADE`, по бизнес-логике должны быть `RESTRICT` (история неудаляема):
+- `orders.recipe_id → recipes`
+- `orders.user_id → users`
+- `bar_inventory.ingredient_id → ingredients`
+- `recipe_ingredients.ingredient_id → ingredients`
+
+**Причина отсрочки:** изменение поведения при DELETE — требует решения по soft-delete/анонимизации пользователей перед применением. Зафиксировано в `.agents/plans/2026-06-01-schema-fk-audit.md`.
 
 ---
 
