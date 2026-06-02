@@ -7,6 +7,7 @@ use App\Actions\Orders\AcceptOrderAction;
 use App\Actions\Orders\CancelOrderAction;
 use App\Actions\Orders\ListOrdersAction;
 use App\Actions\Orders\PlaceOrderAction;
+use App\Actions\Favorites\FavoriteToggleAction;
 use App\Actions\Search\GetRecipeAction;
 use App\Actions\Search\SearchRecipesAction;
 use App\Actions\Session\SessionAction;
@@ -43,4 +44,9 @@ Route::middleware('auth.telegram')->group(function () {
         Route::patch('/orders/{id}/accept', AcceptOrderAction::class);
         Route::patch('/orders/{id}/cancel', CancelOrderAction::class);
     });
+
+    Route::post('/recipes/{id}/favorite', FavoriteToggleAction::class);
+
+    // BB-11: Ratings (temporary route)
+    Route::post('/recipes/{id}/rate', \App\Actions\Ratings\RateAction::class);
 });
