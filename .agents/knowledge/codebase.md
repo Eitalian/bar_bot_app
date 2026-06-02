@@ -502,15 +502,18 @@ PostgreSQL **не индексирует referencing-колонку FK авто�
 | `idx_recipe_ingredients_recipe_id`, `idx_recipe_ingredients_ingredient_id` | Основная junction |
 | `idx_recipe_tags_recipe_id`, `idx_recipe_photos_recipe_id` | Все запросы по recipe_id |
 
-### Деferred: CASCADE → RESTRICT для 4 FK
+### FK ON DELETE политика (BB-10)
 
-Четыре FK имеют `ON DELETE CASCADE`, по бизнес-логике должны быть `RESTRICT` (история неудаляема):
-- `orders.recipe_id → recipes`
-- `orders.user_id → users`
-- `bar_inventory.ingredient_id → ingredients`
-- `recipe_ingredients.ingredient_id → ingredients`
+Четыре FK изменены с CASCADE на RESTRICT миграцией `2026_06_02_000002_alter_fk_cascade_to_restrict` (BB-10):
 
-**Причина отсрочки:** изменение поведения при DELETE — требует решения по soft-delete/анонимизации пользователей перед применением. Зафиксировано в `.agents/plans/2026-06-01-schema-fk-audit.md`.
+| FK | Политика | Причина |
+|---|---|---|
+| `orders.recipe_id → recipes` | RESTRICT | История заказов неудаляема |
+| `orders.user_id → users` | RESTRICT | История заказов неудаляема |
+| `bar_inventory.ingredient_id → ingredients` | RESTRICT | Нельзя удалить используемый ингредиент |
+| `recipe_ingredients.ingredient_id → ingredients` | RESTRICT | Нельзя удалить ингредиент из рецепта |
+
+Удаление через приложение не предусмотрено — RESTRICT защищает от случайного ручного `DELETE` в БД.
 
 ---
 
