@@ -477,11 +477,11 @@ Recipe::factory()->nonAlcoholic()->create() // abv = 0.0
 | Таблица.колонка | Тип | Обоснование |
 |---|---|---|
 | `recipes.id` | `TEXT` | Slug + UUID-строки, смешанный формат. VARCHAR(N) не даёт пользы — TOAST-хранение одинаковое. Возможное улучшение: разделить на `id UUID` + `slug VARCHAR(200)` при рефакторинге импорта (не запланировано). |
-| `users.id` | `BIGINT IDENTITY` | Внутренний PK. INT покрыл бы 2.1 млрд пользователей, но BIGINT — умолчание Laravel migrations и даёт запас без затрат (8 байт в PK — не критично). |
+| `users.id` | `BIGINT IDENTITY` | Взят из шаблона конвенции без обоснования кардинальности. Реальный масштаб (≤10 млн пользователей) укладывается в INTEGER; сменить через ALTER-миграцию — задача отдельного рефакторинга. |
 | `users.telegram_id` | `BIGINT` | Telegram UID ≤ 2^52 — BIGINT (8 байт, max ~9.2×10¹⁸) подходит. |
 | `bars.id`, `bar_sessions.id`, `bar_inventory.bar_id` | `SMALLINT` | Число баров и сессий заведомо мало; SMALLINT экономит место в FK. |
 | `bar_sessions.id` | `SMALLINT IDENTITY` | 32 767 значений ≈ 89 лет ежедневных сессий. |
-| `orders.id` | `BIGINT` | INT (2.1 млрд) теоретически хватит, но при 1000 заказов/день это 5874 года. BIGINT выбран для единообразия с `users.id` и чтобы не делать ALTER по мере роста нагрузки. |
+| `orders.id` | `BIGINT` | Умолчание Laravel `$table->id()`. При реалистичной нагрузке (~50 заказов/вечер × 1000 баров × 10 лет ≈ 180 млн) INT тоже справился бы, но отклонение от default не оправдано. |
 | `orders.session_id` | `SMALLINT` | Соответствует `bar_sessions.id` (после миграции 2026_05_26). |
 | `orders.quantity` | `SMALLINT` | 1–5 порций (Phase 3.1). CHECK `quantity IS NULL OR (quantity BETWEEN 1 AND 5)` добавлен BB-9. |
 | `ratings.score` | `SMALLINT` | Шкала 1–5 (Phase 4 design). CHECK `score BETWEEN 1 AND 5` добавлен BB-9. |
