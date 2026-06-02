@@ -13,6 +13,7 @@ final class Inventory extends Model
     protected $table = 'bar_inventory';
 
     protected $fillable = [
+        'bar_id',
         'ingredient_id',
         'quantity',
         'unit',
