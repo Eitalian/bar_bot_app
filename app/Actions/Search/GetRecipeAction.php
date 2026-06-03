@@ -86,7 +86,7 @@ final class GetRecipeAction
 
         if ($this->sessionHandler->handle() !== null) {
             $keyboard->addRow(
-                InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:order:{$recipe->id}"),
+                InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:{$recipe->id}:order"),
             );
         }
 
