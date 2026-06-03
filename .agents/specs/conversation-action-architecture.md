@@ -61,9 +61,24 @@ final class AcceptOrderAction
 **Правило:** если для use-case уже существует Action с `fromTelegram` — HTTP-вход добавляется
 методом `__invoke` в тот же класс. Класс `UpdateFooAction` / `ManageFooAction` — сигнал нарушения.
 
+## Auth в `fromTelegram`
+
+Middleware `AuthenticateTelegramUser` вызывается раньше любого Action и выполняет `Auth::setUser($user)`. Это означает, что `Auth::id()` доступен во **всех** `fromTelegram`-методах без дополнительных запросов.
+
+```php
+// ❌ ЛИШНИЙ ЗАПРОС к БД — user уже аутентифицирован middleware
+$userId = User::where('telegram_id', $bot->userId())->value('id');
+
+// ✅ Auth::id() всегда корректен в fromTelegram (и в Action, и в Conversation)
+$userId = Auth::id();
+```
+
+**Grep-маркер:** `User::where('telegram_id'` встречаться должен ТОЛЬКО в `app/Telegram/Middleware/AuthenticateTelegramUser.php`.
+
 ## Чек-лист для ревью
 
 - [ ] `grep -rn "app(.*Handler::class)" app/Telegram/` → 0 совпадений
+- [ ] `grep -rn "User::where('telegram_id'" app/Actions/ app/Telegram/Conversations/` → 0 совпадений
 - [ ] Все callback/command routes в `routes/telegram.php` указывают на `[Action::class, 'fromTelegram']` (или `Action::class` для invokable HTTP-Action)
 - [ ] В `app/Telegram/Handlers/` нет классов с бизнес-вызовами (или каталог не существует)
 - [ ] Нет `Update*Action` / `Manage*Action` классов, если для того же use-case уже существует `AcceptXAction` / `CancelXAction` с `fromTelegram`

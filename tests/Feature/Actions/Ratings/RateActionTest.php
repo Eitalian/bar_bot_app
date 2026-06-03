@@ -3,17 +3,13 @@
 use App\Models\Recipe;
 use App\Models\User;
 
-it('POST /api/recipes/{id}/rate creates rating and returns stats', function () {
+it('POST /api/recipes/{id}/rate creates rating and returns score', function () {
     $user   = User::factory()->create();
     $recipe = Recipe::factory()->create();
 
     $this->postJson("/api/recipes/{$recipe->id}/rate?telegram_id={$user->telegram_id}", ['score' => 4])
         ->assertOk()
-        ->assertJson([
-            'score' => 4,
-            'avg'   => '4.0',
-            'count' => 1,
-        ]);
+        ->assertJson(['score' => 4]);
 });
 
 it('POST /api/recipes/{id}/rate upserts on second call', function () {
@@ -25,11 +21,7 @@ it('POST /api/recipes/{id}/rate upserts on second call', function () {
 
     $this->postJson("/api/recipes/{$recipe->id}/rate?telegram_id={$user->telegram_id}", ['score' => 2])
         ->assertOk()
-        ->assertJson([
-            'score' => 2,
-            'avg'   => '2.0',
-            'count' => 1,
-        ]);
+        ->assertJson(['score' => 2]);
 });
 
 it('POST /api/recipes/{id}/rate returns 422 for score 0', function () {

@@ -11,7 +11,7 @@ it('returns empty collection for user with no favorites', function () {
 
     $result = (new ListFavoritesHandler())->handle($user->id);
 
-    expect($result)->toBeEmpty();
+    expect($result->items)->toBeEmpty();
 });
 
 it('returns favorites ordered by score desc then name asc', function () {
@@ -31,11 +31,11 @@ it('returns favorites ordered by score desc then name asc', function () {
 
     $result = (new ListFavoritesHandler())->handle($user->id);
 
-    expect($result)->toHaveCount(3);
+    expect($result->items)->toHaveCount(3);
     // Score 5 first, then score 3, then null (no rating) — alphabetical among ties
-    expect($result[0]->id)->toBe($recipeC->id); // score 5
-    expect($result[1]->id)->toBe($recipeA->id); // score 3
-    expect($result[2]->id)->toBe($recipeB->id); // null score, last
+    expect($result->items[0]->id)->toBe($recipeC->id); // score 5
+    expect($result->items[1]->id)->toBe($recipeA->id); // score 3
+    expect($result->items[2]->id)->toBe($recipeB->id); // null score, last
 });
 
 it('includes user_score attribute on rated recipes', function () {
@@ -51,9 +51,9 @@ it('includes user_score attribute on rated recipes', function () {
 
     $result = (new ListFavoritesHandler())->handle($user->id);
 
-    $ratedResult = $result->firstWhere('id', $ratedRecipe->id);
-    $unratedResult = $result->firstWhere('id', $unratedRecipe->id);
+    $ratedResult = $result->items->firstWhere('id', $ratedRecipe->id);
+    $unratedResult = $result->items->firstWhere('id', $unratedRecipe->id);
 
-    expect($ratedResult->user_score)->toBe(4);
-    expect($unratedResult->user_score)->toBeNull();
+    expect($ratedResult->userScore)->toBe(4);
+    expect($unratedResult->userScore)->toBeNull();
 });

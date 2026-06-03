@@ -9,9 +9,8 @@ it('adds to favorites when not favorited', function () {
     $user = User::factory()->create();
     $recipe = Recipe::factory()->create();
 
-    $result = (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
+    (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
 
-    expect($result)->toBeTrue();
     expect(Favorite::where('user_id', $user->id)
         ->where('recipe_id', $recipe->id)
         ->exists())->toBeTrue();
@@ -20,9 +19,8 @@ it('adds to favorites when not favorited', function () {
 it('removes from favorites when already favorited', function () {
     $favorite = Favorite::factory()->create();
 
-    $result = (new FavoriteToggleHandler())->handle($favorite->user_id, $favorite->recipe_id);
+    (new FavoriteToggleHandler())->handle($favorite->user_id, $favorite->recipe_id);
 
-    expect($result)->toBeFalse();
     expect(Favorite::where('user_id', $favorite->user_id)
         ->where('recipe_id', $favorite->recipe_id)
         ->exists())->toBeFalse();
@@ -32,17 +30,9 @@ it('toggling twice returns to original state', function () {
     $user = User::factory()->create();
     $recipe = Recipe::factory()->create();
 
-    // First toggle: add to favorites
-    $firstResult = (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
-    expect($firstResult)->toBeTrue();
-    expect(Favorite::where('user_id', $user->id)
-        ->where('recipe_id', $recipe->id)
-        ->exists())->toBeTrue();
+    (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
+    expect(Favorite::where('user_id', $user->id)->where('recipe_id', $recipe->id)->exists())->toBeTrue();
 
-    // Second toggle: remove from favorites
-    $secondResult = (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
-    expect($secondResult)->toBeFalse();
-    expect(Favorite::where('user_id', $user->id)
-        ->where('recipe_id', $recipe->id)
-        ->exists())->toBeFalse();
+    (new FavoriteToggleHandler())->handle($user->id, $recipe->id);
+    expect(Favorite::where('user_id', $user->id)->where('recipe_id', $recipe->id)->exists())->toBeFalse();
 });

@@ -6,7 +6,7 @@ use App\Models\Favorite;
 
 final class FavoriteToggleHandler
 {
-    public function handle(int $userId, string $recipeId): bool
+    public function handle(int $userId, string $recipeId): void
     {
         $favorite = Favorite::where('user_id', $userId)
             ->where('recipe_id', $recipeId)
@@ -14,14 +14,13 @@ final class FavoriteToggleHandler
 
         if ($favorite) {
             $favorite->delete();
-            return false;
+
+            return;
         }
 
         Favorite::create([
             'user_id'   => $userId,
             'recipe_id' => $recipeId,
         ]);
-
-        return true;
     }
 }

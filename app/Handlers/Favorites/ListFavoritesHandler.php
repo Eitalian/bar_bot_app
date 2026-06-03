@@ -2,39 +2,57 @@
 
 namespace App\Handlers\Favorites;
 
-use App\Models\Recipe;
-use Illuminate\Support\Collection;
+use App\Data\Favorites\FavoritesPage;
+use App\Data\Favorites\RecipeFavoriteItem;
 use Illuminate\Support\Facades\DB;
 
 final class ListFavoritesHandler
 {
-    /**
-     * Return a collection of Recipe models (with user_score attribute) for the given user's favorites.
-     *
-     * Ordered by: user_score DESC NULLS LAST, name_ru ASC.
-     *
-     * @return Collection<int, Recipe>
-     */
-    public function handle(int $userId): Collection
+    public function handle(int $userId, int $page = 1, int $perPage = 10): FavoritesPage
     {
+        $total = DB::table('favorites')->where('user_id', $userId)->count();
+
         $rows = DB::table('favorites')
             ->join('recipes', 'recipes.id', '=', 'favorites.recipe_id')
-            ->leftJoin('ratings', function ($join) use ($userId) {
-                $join->on('ratings.recipe_id', '=', 'favorites.recipe_id')
-                    ->where('ratings.user_id', '=', $userId);
+            ->leftJoin('ratings as ur', function ($join) use ($userId) {
+                $join->on('ur.recipe_id', '=', 'favorites.recipe_id')
+                    ->where('ur.user_id', '=', $userId);
             })
+            ->leftJoin(
+                DB::raw('(SELECT recipe_id, ROUND(AVG(score)::numeric, 1) as avg_score FROM ratings GROUP BY recipe_id) as avg_r'),
+                'avg_r.recipe_id',
+                '=',
+                'favorites.recipe_id',
+            )
             ->where('favorites.user_id', $userId)
-            ->orderByRaw('ratings.score DESC NULLS LAST')
+            ->orderByRaw('ur.score DESC NULLS LAST')
             ->orderBy('recipes.name_ru', 'asc')
-            ->select('recipes.*', 'ratings.score as user_score')
+            ->select(
+                'recipes.id',
+                'recipes.name_ru',
+                'recipes.abv',
+                'recipes.volume',
+                'ur.score as user_score',
+                'avg_r.avg_score as avg_rating',
+            )
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
             ->get();
 
-        return $rows->map(function (object $row) {
-            $recipe = new Recipe();
-            $recipe->setRawAttributes((array) $row, true);
-            $recipe->user_score = isset($row->user_score) ? (int) $row->user_score : null;
+        $items = $rows->map(fn(object $row) => new RecipeFavoriteItem(
+            id: $row->id,
+            name_ru: $row->name_ru,
+            abv: $row->abv !== null ? (float) $row->abv : null,
+            volume: $row->volume !== null ? (int) $row->volume : null,
+            userScore: $row->user_score !== null ? (int) $row->user_score : null,
+            avgRating: $row->avg_rating !== null ? (float) $row->avg_rating : null,
+        ));
 
-            return $recipe;
-        });
+        return new FavoritesPage(
+            items: $items,
+            total: $total,
+            perPage: $perPage,
+            page: $page,
+        );
     }
 }

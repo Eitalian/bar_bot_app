@@ -13,30 +13,30 @@ it('full flow: favorite → rate → upsert → unfavorite, rating persists', fu
         ->assertOk()
         ->assertExactJson([]);
 
-    // 2. POST favorite → {favorited: true}
+    // 2. POST favorite → {success: true}
     $this->postJson("/api/recipes/{$recipe->id}/favorite?telegram_id={$user->telegram_id}")
         ->assertOk()
-        ->assertJson(['favorited' => true]);
+        ->assertJson(['success' => true]);
 
     // 3. GET /api/favorites → массив с рецептом
     $this->getJson("/api/favorites?telegram_id={$user->telegram_id}")
         ->assertOk()
         ->assertJsonCount(1);
 
-    // 4. POST rate score=4 → {score:4, avg:4.0, count:1}
+    // 4. POST rate score=4 → {score:4}
     $this->postJson("/api/recipes/{$recipe->id}/rate?telegram_id={$user->telegram_id}", ['score' => 4])
         ->assertOk()
-        ->assertJson(['score' => 4, 'count' => 1]);
+        ->assertJson(['score' => 4]);
 
-    // 5. POST rate score=2 (upsert) → {score:2, avg:2.0, count:1}
+    // 5. POST rate score=2 (upsert) → {score:2}
     $this->postJson("/api/recipes/{$recipe->id}/rate?telegram_id={$user->telegram_id}", ['score' => 2])
         ->assertOk()
-        ->assertJson(['score' => 2, 'count' => 1]);
+        ->assertJson(['score' => 2]);
 
-    // 6. POST favorite второй раз → {favorited: false}
+    // 6. POST favorite второй раз → {success: true} (toggle off)
     $this->postJson("/api/recipes/{$recipe->id}/favorite?telegram_id={$user->telegram_id}")
         ->assertOk()
-        ->assertJson(['favorited' => false]);
+        ->assertJson(['success' => true]);
 
     // 7. GET /api/favorites → пустой массив (favorite удалён)
     $this->getJson("/api/favorites?telegram_id={$user->telegram_id}")

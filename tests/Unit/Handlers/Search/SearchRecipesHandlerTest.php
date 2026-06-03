@@ -11,8 +11,8 @@ it('finds recipes by name_ru (case-insensitive)', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(q: 'марг'));
 
-    expect($result->total())->toBe(1)
-        ->and($result->items()[0]->name_ru)->toBe('Маргарита');
+    expect($result->recipes->total())->toBe(1)
+        ->and($result->recipes->items()[0]->name_ru)->toBe('Маргарита');
 });
 
 it('finds recipes by name_en (case-insensitive)', function () {
@@ -21,8 +21,8 @@ it('finds recipes by name_en (case-insensitive)', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(q: 'MOJITO'));
 
-    expect($result->total())->toBe(1)
-        ->and($result->items()[0]->name_en)->toBe('Mojito');
+    expect($result->recipes->total())->toBe(1)
+        ->and($result->recipes->items()[0]->name_en)->toBe('Mojito');
 });
 
 it('filters by glass type', function () {
@@ -31,7 +31,7 @@ it('filters by glass type', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(glass: 'rocks'));
 
-    expect($result->total())->toBe(1);
+    expect($result->recipes->total())->toBe(1);
 });
 
 it('filters by abv range', function () {
@@ -41,8 +41,8 @@ it('filters by abv range', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(abvMin: 10.0, abvMax: 30.0));
 
-    expect($result->total())->toBe(1)
-        ->and((float) $result->items()[0]->abv)->toBe(25.0);
+    expect($result->recipes->total())->toBe(1)
+        ->and((float) $result->recipes->items()[0]->abv)->toBe(25.0);
 });
 
 it('returns non-alcoholic recipes when abvMax is 0', function () {
@@ -52,7 +52,7 @@ it('returns non-alcoholic recipes when abvMax is 0', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(abvMin: 0.0, abvMax: 0.0));
 
-    expect($result->total())->toBe(2);
+    expect($result->recipes->total())->toBe(2);
 });
 
 it('filters by volume range', function () {
@@ -62,8 +62,8 @@ it('filters by volume range', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(volMin: 60, volMax: 200));
 
-    expect($result->total())->toBe(1)
-        ->and($result->items()[0]->volume)->toBe(100);
+    expect($result->recipes->total())->toBe(1)
+        ->and($result->recipes->items()[0]->volume)->toBe(100);
 });
 
 it('filters by tag', function () {
@@ -73,7 +73,7 @@ it('filters by tag', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(tag: 'long'));
 
-    expect($result->total())->toBe(1);
+    expect($result->recipes->total())->toBe(1);
 });
 
 it('returns empty paginator when no match', function () {
@@ -81,7 +81,7 @@ it('returns empty paginator when no match', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(q: 'невозможноеназвание'));
 
-    expect($result->isEmpty())->toBeTrue();
+    expect($result->recipes->isEmpty())->toBeTrue();
 });
 
 it('returns all recipes when no filters applied', function () {
@@ -89,7 +89,7 @@ it('returns all recipes when no filters applied', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData());
 
-    expect($result->total())->toBe(5);
+    expect($result->recipes->total())->toBe(5);
 });
 
 it('paginates results correctly', function () {
@@ -97,6 +97,6 @@ it('paginates results correctly', function () {
 
     $result = new SearchRecipesHandler()->handle(new SearchRecipesData(page: 2, perPage: 3));
 
-    expect($result->currentPage())->toBe(2)
-        ->and(count($result->items()))->toBe(3);
+    expect($result->recipes->currentPage())->toBe(2)
+        ->and(count($result->recipes->items()))->toBe(3);
 });

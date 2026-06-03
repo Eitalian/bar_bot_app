@@ -4,7 +4,6 @@ namespace App\Actions\Favorites;
 
 use App\Actions\Search\GetRecipeAction;
 use App\Handlers\Favorites\FavoriteToggleHandler;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,16 +15,14 @@ final class FavoriteToggleAction
 
     public function __invoke(Request $request, string $id): JsonResponse
     {
-        $userId = Auth::id();
-        $isFavorite = $this->handler->handle($userId, $id);
+        $this->handler->handle(Auth::id(), $id);
 
-        return response()->json(['favorited' => $isFavorite]);
+        return response()->json(['success' => true]);
     }
 
     public function fromTelegram(Nutgram $bot, string $id): void
     {
-        $user = User::where('telegram_id', $bot->userId())->firstOrFail();
-        $this->handler->handle($user->id, $id);
+        $this->handler->handle(Auth::id(), $id);
 
         app(GetRecipeAction::class)->fromTelegram($bot, $id);
     }

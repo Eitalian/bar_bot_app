@@ -4,12 +4,11 @@ namespace App\Actions\Search;
 
 use App\Data\Search\SearchRecipesData;
 use App\Handlers\Search\SearchRecipesHandler;
-use App\Models\Favorite;
-use App\Models\User;
 use App\Services\BrowseContext;
 use App\Telegram\Responses\SearchResultsResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use SergiX44\Nutgram\Nutgram;
 
 final class SearchRecipesAction
@@ -31,32 +30,27 @@ final class SearchRecipesAction
             perPage: (int) $request->input('per_page', config('bar.search.per_page')),
         );
 
-        return response()->json($this->handler->handle($data));
+        return response()->json($this->handler->handle($data)->recipes);
     }
 
     public function fromTelegram(Nutgram $bot, SearchRecipesData $data): void
     {
-        $results = $this->handler->handle($data);
+        $result = $this->handler->handle($data, Auth::id());
 
-        if ($results->isEmpty()) {
+        if ($result->recipes->isEmpty()) {
             $bot->sendMessage($this->emptyMessage($data), parse_mode: 'Markdown');
 
             return;
         }
 
-        $browseKey = $this->browseContext->store($results->pluck('id')->all(), $bot->userId());
-
-        $telegramId = $bot->userId();
-        $userId = User::where('telegram_id', $telegramId)->value('id');
-        $favoritedIds = $userId
-            ? Favorite::where('user_id', $userId)->pluck('recipe_id')->flip()
-            : collect();
+        $browseKey = $this->browseContext->store($result->recipes->pluck('id')->all(), $bot->userId());
 
         $response = new SearchResultsResponse(
-            header: $this->header($data) . "Найдено: {$results->total()} рецептов\n\n",
-            recipes: $results->values(),
+            header: $this->header($data) . "Найдено: {$result->recipes->total()} рецептов\n\n",
+            recipes: $result->recipes->values(),
             browseKey: $browseKey,
-            favoritedIds: $favoritedIds,
+            favoritedIds: $result->favoritedIds,
+            avgRatings: $result->avgRatings,
         );
 
         $bot->sendMessage(
