@@ -3,12 +3,14 @@
 namespace App\Handlers\Search;
 
 use App\Data\Search\SearchRecipesData;
+use App\Data\Search\SearchResult;
+use App\Models\Favorite;
+use App\Models\Rating;
 use App\Models\Recipe;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 final class SearchRecipesHandler
 {
-    public function handle(SearchRecipesData $data): LengthAwarePaginator
+    public function handle(SearchRecipesData $data, ?int $userId = null): SearchResult
     {
         $query = Recipe::query()->orderBy('name_ru');
 
@@ -32,9 +34,31 @@ final class SearchRecipesHandler
         }
 
         if ($data->tag !== null && $data->tag !== '') {
-            $query->whereHas('tags', fn ($q) => $q->where('tag', $data->tag));
+            $query->whereHas('tags', fn($q) => $q->where('tag', $data->tag));
         }
 
-        return $query->paginate($data->perPage, ['*'], 'page', $data->page);
+        $paginator = $query->paginate($data->perPage, ['*'], 'page', $data->page);
+
+        if ($userId === null || $paginator->isEmpty()) {
+            return new SearchResult(recipes: $paginator);
+        }
+
+        $recipeIds = $paginator->pluck('id');
+
+        $favoritedIds = Favorite::where('user_id', $userId)
+            ->whereIn('recipe_id', $recipeIds)
+            ->pluck('recipe_id')
+            ->flip();
+
+        $avgRatings = Rating::whereIn('recipe_id', $recipeIds)
+            ->selectRaw('recipe_id, ROUND(AVG(score), 1) as avg')
+            ->groupBy('recipe_id')
+            ->pluck('avg', 'recipe_id');
+
+        return new SearchResult(
+            recipes: $paginator,
+            favoritedIds: $favoritedIds,
+            avgRatings: $avgRatings,
+        );
     }
 }

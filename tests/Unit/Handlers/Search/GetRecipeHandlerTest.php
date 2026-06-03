@@ -13,9 +13,9 @@ it('returns recipe with recipeIngredients eager-loaded', function () {
 
     $result = new GetRecipeHandler()->handle($recipe->id);
 
-    expect($result)->not->toBeNull()
-        ->and($result->relationLoaded('recipeIngredients'))->toBeTrue()
-        ->and($result->recipeIngredients)->toHaveCount(1);
+    expect($result->recipe)->not->toBeNull()
+        ->and($result->recipe->relationLoaded('recipeIngredients'))->toBeTrue()
+        ->and($result->recipe->recipeIngredients)->toHaveCount(1);
 });
 
 it('returns recipe with tags eager-loaded', function () {
@@ -24,12 +24,12 @@ it('returns recipe with tags eager-loaded', function () {
 
     $result = new GetRecipeHandler()->handle($recipe->id);
 
-    expect($result->relationLoaded('tags'))->toBeTrue()
-        ->and($result->tags)->toHaveCount(1);
+    expect($result->recipe->relationLoaded('tags'))->toBeTrue()
+        ->and($result->recipe->tags)->toHaveCount(1);
 });
 
 it('returns null for non-existent id', function () {
     $result = new GetRecipeHandler()->handle('00000000-0000-0000-0000-000000000000');
 
-    expect($result)->toBeNull();
+    expect($result->recipe)->toBeNull();
 });

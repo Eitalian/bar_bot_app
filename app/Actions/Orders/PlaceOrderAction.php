@@ -40,13 +40,13 @@ final class PlaceOrderAction
     public function fromTelegram(Nutgram $bot, string $id): void
     {
         $keyboard = InlineKeyboardMarkup::make()->addRow(
-            InlineKeyboardButton::make('1', callback_data: "recipe:order:{$id}:1"),
-            InlineKeyboardButton::make('2', callback_data: "recipe:order:{$id}:2"),
-            InlineKeyboardButton::make('3', callback_data: "recipe:order:{$id}:3"),
-            InlineKeyboardButton::make('4', callback_data: "recipe:order:{$id}:4"),
-            InlineKeyboardButton::make('5', callback_data: "recipe:order:{$id}:5"),
+            InlineKeyboardButton::make('1', callback_data: "recipe:{$id}:order:1"),
+            InlineKeyboardButton::make('2', callback_data: "recipe:{$id}:order:2"),
+            InlineKeyboardButton::make('3', callback_data: "recipe:{$id}:order:3"),
+            InlineKeyboardButton::make('4', callback_data: "recipe:{$id}:order:4"),
+            InlineKeyboardButton::make('5', callback_data: "recipe:{$id}:order:5"),
         )->addRow(
-            InlineKeyboardButton::make('🔙 Назад', callback_data: "recipe:show:{$id}"),
+            InlineKeyboardButton::make('🔙 Назад', callback_data: "recipe:{$id}:show"),
         );
 
         $bot->editMessageReplyMarkup(reply_markup: $keyboard);

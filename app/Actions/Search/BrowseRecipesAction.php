@@ -68,7 +68,7 @@ final class BrowseRecipesAction
 
         $actionRow = [InlineKeyboardButton::make('🍴 Форкнуть', callback_data: 'noop')];
         if ($this->sessionHandler->handle() !== null) {
-            array_unshift($actionRow, InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:order:{$id}"));
+            array_unshift($actionRow, InlineKeyboardButton::make('🛒 Заказать', callback_data: "recipe:{$id}:order"));
         }
         $keyboard->addRow(...$actionRow);
 

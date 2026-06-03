@@ -21,8 +21,8 @@ it('returns recipes containing all specified ingredients', function () {
         new SearchByIngredientData(ingredientIds: ['vodka', 'lime_juice']),
     );
 
-    expect($result)->toHaveCount(1)
-        ->and($result->first()->id)->toBe($both->id);
+    expect($result->recipes)->toHaveCount(1)
+        ->and($result->recipes->first()->id)->toBe($both->id);
 });
 
 it('returns all matching recipes for single ingredient', function () {
@@ -38,7 +38,7 @@ it('returns all matching recipes for single ingredient', function () {
         new SearchByIngredientData(ingredientIds: ['rum']),
     );
 
-    expect($result)->toHaveCount(2);
+    expect($result->recipes)->toHaveCount(2);
 });
 
 it('returns empty collection when ingredientIds is empty', function () {
@@ -48,7 +48,7 @@ it('returns empty collection when ingredientIds is empty', function () {
         new SearchByIngredientData(ingredientIds: []),
     );
 
-    expect($result)->toBeEmpty();
+    expect($result->recipes)->toBeEmpty();
 });
 
 it('returns empty when no recipe has all ingredients', function () {
@@ -62,7 +62,7 @@ it('returns empty when no recipe has all ingredients', function () {
         new SearchByIngredientData(ingredientIds: ['vodka', 'gin']),
     );
 
-    expect($result)->toBeEmpty();
+    expect($result->recipes)->toBeEmpty();
 });
 
 it('orders results by name_ru', function () {
@@ -78,5 +78,5 @@ it('orders results by name_ru', function () {
         new SearchByIngredientData(ingredientIds: ['rum']),
     );
 
-    expect($result->first()->id)->toBe($a->id);
+    expect($result->recipes->first()->id)->toBe($a->id);
 });
