@@ -7,7 +7,11 @@ use App\Actions\Inventory\RemoveInventoryAction;
 use App\Actions\Orders\AcceptOrderAction;
 use App\Actions\Orders\CancelOrderAction;
 use App\Actions\Orders\ListOrdersAction;
+use App\Actions\Favorites\FavoriteToggleAction;
+use App\Actions\Favorites\ListFavoritesAction;
 use App\Actions\Orders\PlaceOrderAction;
+use App\Actions\Ratings\RateAction;
+use App\Actions\Ratings\ShowRatingPickerAction;
 use App\Actions\Search\BrowseRecipesAction;
 use App\Actions\Search\GetRecipeAction;
 use App\Actions\Session\SessionAction;
@@ -16,6 +20,7 @@ use App\Actions\StartAction;
 use App\Middleware\CanManageMiddleware;
 use App\Telegram\Conversations\AddInventoryConversation;
 use App\Telegram\Conversations\FilterConversation;
+use App\Telegram\Conversations\ListFavoritesConversation;
 use App\Telegram\Conversations\SearchByIngredientConversation;
 use App\Telegram\Conversations\SearchByNameConversation;
 use App\Telegram\Middleware\AuthenticateTelegramUser;
@@ -45,7 +50,7 @@ $bot->onCallbackQueryData('cmd:filter', fn(Nutgram $bot) => FilterConversation::
 
 // Phase 2: Recipe browsing
 $bot->onCallbackQueryData('recipe:browse:{browseKey}:{pos}', [BrowseRecipesAction::class, 'fromTelegram']);
-$bot->onCallbackQueryData('recipe:show:{id}', [GetRecipeAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:show', [GetRecipeAction::class, 'fromTelegram']);
 $bot->onCallbackQueryData('browse:back', [StartAction::class, 'fromTelegram']);
 
 $bot->onCallbackQueryData('noop', fn(Nutgram $bot) => $bot->answerCallbackQuery());
@@ -59,9 +64,15 @@ $bot->group(function (Nutgram $bot): void {
 })->middleware(CanManageMiddleware::class);
 
 // Phase 3.1: Orders
-$bot->onCallbackQueryData('recipe:order:{id}',      [PlaceOrderAction::class, 'fromTelegram']);
-$bot->onCallbackQueryData('recipe:order:{id}:{qty}', [PlaceOrderAction::class, 'confirm']);
+$bot->onCallbackQueryData('recipe:{id}:order',       [PlaceOrderAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:order:{qty}', [PlaceOrderAction::class, 'confirm']);
 $bot->onCallbackQueryData('orders:my', [ListOrdersAction::class, 'fromTelegram']);
+
+// Phase 4: Favorites & Ratings
+$bot->onCommand('favorites', fn(Nutgram $bot) => ListFavoritesConversation::begin($bot));
+$bot->onCallbackQueryData('recipe:{id}:favorite', [FavoriteToggleAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:rate:{score}', [RateAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:rate:new', [ShowRatingPickerAction::class, 'fromTelegram']);
 
 $bot->group(function (Nutgram $bot): void {
     $bot->onCallbackQueryData('order:qty:{id}:{n}', [AcceptOrderAction::class, 'fromTelegram']);

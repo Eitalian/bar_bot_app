@@ -2,7 +2,9 @@
 
 namespace App\Telegram\Responses;
 
+use App\Models\Rating;
 use App\Models\Recipe;
+use Illuminate\Support\Collection;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
 
@@ -17,17 +19,44 @@ final class SearchResultsResponse
         private string $browseKey,
         private bool $showVolume = true,
         private ?string $overflowText = null,
+        private Collection $favoritedIds = new Collection(),
     ) {}
 
     public function text(): string
     {
         $text = $this->header;
 
-        foreach ($this->recipes as $recipe) {
-            $abv = $recipe->abv ? " {$recipe->abv}%" : '';
-            $vol = $this->showVolume && $recipe->volume ? " {$recipe->volume}мл" : '';
-            $text .= "• {$recipe->name_ru}{$abv}{$vol}\n";
+        $recipeList = collect($this->recipes);
+        $recipeIds = $recipeList->pluck('id');
+
+        $avgRatings = Rating::whereIn('recipe_id', $recipeIds)
+            ->selectRaw('recipe_id, ROUND(AVG(score), 1) as avg')
+            ->groupBy('recipe_id')
+            ->pluck('avg', 'recipe_id');
+
+        $text .= "```\n";
+        foreach ($recipeList as $recipe) {
+            $fav = $this->favoritedIds->has($recipe->id) ? '❤' : ' ';
+
+            $name = mb_substr($recipe->name_ru, 0, 20);
+            $name = mb_str_pad($name, 20);
+
+            $rateVal = $avgRatings->get($recipe->id);
+            $rate = $rateVal ? '⭐' . $rateVal : '    ';
+
+            $abvVal = $recipe->abv ? $recipe->abv . '%' : '   ';
+            $abv = mb_str_pad($abvVal, 3);
+
+            if ($this->showVolume && $recipe->volume) {
+                $volStr = $recipe->volume . 'мл';
+                $vol = mb_str_pad($volStr, 5);
+            } else {
+                $vol = '     ';
+            }
+
+            $text .= "{$fav} {$name} {$rate} {$abv} {$vol}\n";
         }
+        $text .= "```";
 
         if ($this->overflowText !== null) {
             $text .= "\n{$this->overflowText}";

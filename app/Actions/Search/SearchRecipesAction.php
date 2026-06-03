@@ -4,6 +4,8 @@ namespace App\Actions\Search;
 
 use App\Data\Search\SearchRecipesData;
 use App\Handlers\Search\SearchRecipesHandler;
+use App\Models\Favorite;
+use App\Models\User;
 use App\Services\BrowseContext;
 use App\Telegram\Responses\SearchResultsResponse;
 use Illuminate\Http\JsonResponse;
@@ -44,10 +46,17 @@ final class SearchRecipesAction
 
         $browseKey = $this->browseContext->store($results->pluck('id')->all(), $bot->userId());
 
+        $telegramId = $bot->userId();
+        $userId = User::where('telegram_id', $telegramId)->value('id');
+        $favoritedIds = $userId
+            ? Favorite::where('user_id', $userId)->pluck('recipe_id')->flip()
+            : collect();
+
         $response = new SearchResultsResponse(
             header: $this->header($data) . "Найдено: {$results->total()} рецептов\n\n",
             recipes: $results->values(),
             browseKey: $browseKey,
+            favoritedIds: $favoritedIds,
         );
 
         $bot->sendMessage(

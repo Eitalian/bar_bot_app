@@ -4,6 +4,8 @@ namespace App\Actions\Search;
 
 use App\Data\Search\SearchByIngredientData;
 use App\Handlers\Search\SearchByIngredientHandler;
+use App\Models\Favorite;
+use App\Models\User;
 use App\Services\BrowseContext;
 use App\Telegram\Responses\SearchResultsResponse;
 use SergiX44\Nutgram\Nutgram;
@@ -39,12 +41,19 @@ final class SearchByIngredientAction
             ? '_...и ещё ' . ($total - self::RESULTS_LIMIT) . ' рецептов_'
             : null;
 
+        $telegramId = $bot->userId();
+        $userId = User::where('telegram_id', $telegramId)->value('id');
+        $favoritedIds = $userId
+            ? Favorite::where('user_id', $userId)->pluck('recipe_id')->flip()
+            : collect();
+
         $response = new SearchResultsResponse(
             header: "🧪 Ингредиенты: `{$list}`\nНайдено коктейлей: *{$total}*\n\n",
             recipes: $shown,
             browseKey: $browseKey,
             showVolume: false,
             overflowText: $overflow,
+            favoritedIds: $favoritedIds,
         );
 
         $bot->sendMessage(
