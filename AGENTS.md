@@ -71,6 +71,8 @@ docker compose logs -f app
 
 Run a single test: `docker compose exec app php artisan test --filter=TestName`
 
+**Доступ к БД — только через `make db-q`.** DB-инструменты Laravel Boost MCP (`database-query`, `database-schema`, `database-connections`) запрещены в `.claude/settings.local.json`: они ходят через app-коннект с полными правами на запись в обход read-only роли `claude_ro`. Любое чтение схемы/данных — через `make db-q` (роль `claude_ro`). Boost остаётся включён для доков, логов и контекста приложения (`search-docs`, `read-log-entries`, `last-error`, `application-info`).
+
 ## Architecture
 
 **Request flow**: ngrok → `TelegramController` → Nutgram → `routes/telegram.php` → Action или Conversation → Action → Handler → Eloquent models
