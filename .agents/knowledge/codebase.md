@@ -19,7 +19,7 @@
 | 2 | Поиск рецептов (Telegram + HTTP API) | ✅ Готово |
 | 3 | Бар-сессии | ✅ Готово |
 | 3.1 | Заказы коктейлей | ✅ Готово |
-| 4 | Избранное и оценки | ⏳ Не начато |
+| 4 | Избранное и оценки | ✅ Готово |
 | 5 | Загрузка фото | ⏳ Не начато |
 | 6 | Форк коктейля | ⏳ Не начато |
 
@@ -217,6 +217,8 @@ class MyConversation extends Conversation
 $bot->onCallbackQueryData('cmd:search', fn(Nutgram $bot) => SearchByNameConversation::begin($bot));
 ```
 
+**Паттерн смешанного ввода (text + callback) в одном шаге** — `ListFavoritesConversation::handleInput` обрабатывает как callback-query (favorites:prev/next), так и текстовый ввод (числа 1–10 для выбора рецепта). Это работает потому что Nutgram направляет оба типа в активный шаг Conversation.
+
 ---
 
 ## Telegram-маршруты (routes/telegram.php)
@@ -258,6 +260,15 @@ onCallbackQueryData('orders:my')                 → ListOrdersAction::fromTeleg
 Group [CanManageMiddleware]:
   onCallbackQueryData('order:qty:{id}:{n}')      → AcceptOrderAction::fromTelegram
   onCallbackQueryData('order:cancel:{id}')       → CancelOrderAction::fromTelegram
+
+// Phase 4 (активны):
+$bot->onCommand('favorites')                     → ListFavoritesConversation::begin
+onCallbackQueryData('recipe:{id}:show')          → GetRecipeAction::fromTelegram   [rename от recipe:show:{id}]
+onCallbackQueryData('recipe:{id}:order')         → PlaceOrderAction::fromTelegram  [rename от recipe:order:{id}]
+onCallbackQueryData('recipe:{id}:order:{qty}')   → PlaceOrderAction::confirm
+onCallbackQueryData('recipe:{id}:favorite')      → FavoriteToggleAction::fromTelegram
+onCallbackQueryData('recipe:{id}:rate:{score}')  → RateAction::fromTelegram
+onCallbackQueryData('recipe:{id}:rate:new')      → ShowRatingPickerAction::fromTelegram
 ```
 
 ### Кнопки главного меню (StartAction)
@@ -290,6 +301,10 @@ POST   /api/bars/{id}/session      → StartSessionAction     [auth.telegram + C
 
 GET    /api/sessions/{id}/orders   → ListOrdersAction       [auth.telegram + CanManageMiddleware]
 PATCH  /api/orders/{id}            → UpdateOrderAction      [auth.telegram + CanManageMiddleware]
+
+POST  /api/recipes/{id}/favorite  → FavoriteToggleAction  [auth.telegram]   200: {favorited: bool}
+POST  /api/recipes/{id}/rate      → RateAction             [auth.telegram]   body: {score:1-5}; 200: {score, avg, count}
+GET   /api/favorites              → ListFavoritesAction    [auth.telegram]   200: [{recipe...}]
 ```
 
 **Как работает `auth.telegram` middleware**: ищет `User` по `telegram_id` из query-параметра. Если не найден → 404. Используется в тестах как `?telegram_id={$user->telegram_id}`.
@@ -386,6 +401,28 @@ OrderStatus::Cancelled // 'cancelled'— отклонён барменом
 Order::factory()->create()            // status = Pending, quantity = null
 Order::factory()->accepted()->create() // status = Accepted, quantity = 2
 Order::factory()->cancelled()->create() // status = Cancelled
+```
+
+### Favorite
+
+```php
+// $incrementing = true, $timestamps = false (CREATED_AT = 'created_at', UPDATED_AT = null)
+// Fillable: user_id, recipe_id
+// Уникальность: UNIQUE (user_id, recipe_id)
+$favorite->user()   // BelongsTo User
+$favorite->recipe() // BelongsTo Recipe
+```
+
+### Rating
+
+```php
+// $incrementing = true, $timestamps = true
+// Fillable: user_id, recipe_id, score
+// Casts: score → integer
+// CHECK: score BETWEEN 1 AND 5
+// Уникальность: UNIQUE (user_id, recipe_id) — upsert через updateOrCreate
+$rating->user()   // BelongsTo User
+$rating->recipe() // BelongsTo Recipe
 ```
 
 ### RecipeIngredient
