@@ -2,21 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\Bar;
 use Illuminate\Support\ServiceProvider;
 
 final class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        $this->app->singleton(\App\Models\Bar::class, fn() => \App\Models\Bar::default());
+        $this->app->singleton(Bar::class, fn() => Bar::default());
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //

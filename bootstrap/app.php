@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\AuthenticateByTelegramId;
+use App\UI\Middleware\AuthenticateByTelegramId;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
