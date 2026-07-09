@@ -5,6 +5,7 @@ namespace App\UI\Http\Actions\Search;
 use App\Handlers\Search\GetRecipeHandler;
 use App\Handlers\Session\GetActiveSessionHandler;
 use App\Services\BrowseContext;
+use Illuminate\Support\Facades\Auth;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardMarkup;
@@ -35,13 +36,15 @@ final class BrowseRecipesAction
             return;
         }
 
-        $recipe = $this->recipeHandler->handle($id);
+        $result = $this->recipeHandler->handle($id, Auth::id());
 
-        if (! $recipe) {
+        if ($result->recipe === null) {
             $bot->answerCallbackQuery(text: 'Рецепт не найден 😔');
 
             return;
         }
+
+        $recipe = $result->recipe;
 
         $keyboard = InlineKeyboardMarkup::make();
 

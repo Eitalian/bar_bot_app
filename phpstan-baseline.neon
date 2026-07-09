@@ -295,18 +295,6 @@ parameters:
 			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
 
 		-
-			message: '#^Call to an undefined method App\\Data\\Search\\GetRecipeResult\:\:toTelegramMessage\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/UI/Http/Actions/Search/BrowseRecipesAction.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: app/UI/Http/Actions/Search/BrowseRecipesAction.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\BarSession\:\:\$started_at\.$#'
 			identifier: property.notFound
 			count: 2

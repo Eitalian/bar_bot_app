@@ -70,7 +70,7 @@ $bot->onCallbackQueryData('orders:my', [ListOrdersAction::class, 'fromTelegram']
 // Phase 4: Favorites & Ratings
 $bot->onCommand('favorites', fn(Nutgram $bot) => ListFavoritesConversation::begin($bot));
 $bot->onCallbackQueryData('recipe:{id}:favorite', [FavoriteToggleAction::class, 'fromTelegram']);
-$bot->onCallbackQueryData('recipe:{id}:rate:{score}', [RateAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:rate:{score}', [RateAction::class, 'fromTelegram'])->whereNumber('score');
 $bot->onCallbackQueryData('recipe:{id}:rate:new', [ShowRatingPickerAction::class, 'fromTelegram']);
 
 $bot->group(function (Nutgram $bot): void {

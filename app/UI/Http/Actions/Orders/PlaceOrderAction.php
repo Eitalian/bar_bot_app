@@ -8,6 +8,7 @@ use App\Exceptions\NoActiveSessionException;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
 use SergiX44\Nutgram\Nutgram;
 use SergiX44\Nutgram\Telegram\Types\Keyboard\InlineKeyboardButton;
@@ -59,7 +60,7 @@ final class PlaceOrderAction
         try {
             $order = Bus::dispatch(new PlaceOrderData(
                 recipeId: $id,
-                userId:   $bot->userId(),
+                userId:   Auth::id(),
                 quantity: $qty,
             ));
         } catch (NoActiveSessionException) {
