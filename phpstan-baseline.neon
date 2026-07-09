@@ -1,0 +1,433 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method App\\Data\\Search\\SearchResult\:\:__construct\(\) has parameter \$avgRatings with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Search/SearchResult.php
+
+		-
+			message: '#^Method App\\Data\\Search\\SearchResult\:\:__construct\(\) has parameter \$favoritedIds with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Search/SearchResult.php
+
+		-
+			message: '#^Method App\\Data\\Search\\SearchResult\:\:__construct\(\) has parameter \$recipes with generic class Illuminate\\Pagination\\LengthAwarePaginator but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Search/SearchResult.php
+
+		-
+			message: '#^Method App\\Data\\Search\\SearchResult\:\:__construct\(\) has parameter \$recipes with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Data/Search/SearchResult.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Handlers/Orders/AcceptOrderHandler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Handlers/Orders/CancelOrderHandler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Rating\:\:\$avg\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Handlers/Search/GetRecipeHandler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Rating\:\:\$cnt\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Handlers/Search/GetRecipeHandler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\BarSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Handlers/Session/GetActiveSessionHandler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\BarSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Handlers/Session/StartSessionHandler.php
+
+		-
+			message: '#^Method App\\Models\\Favorite\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Favorite.php
+
+		-
+			message: '#^Method App\\Models\\Favorite\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Favorite.php
+
+		-
+			message: '#^Class App\\Models\\Ingredient uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Ingredient.php
+
+		-
+			message: '#^Class App\\Models\\Inventory uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Inventory.php
+
+		-
+			message: '#^Method App\\Models\\Inventory\:\:ingredient\(\) should return Illuminate\\Database\\Eloquent\\Relations\\BelongsTo\<App\\Models\\Ingredient, App\\Models\\Inventory\> but returns Illuminate\\Database\\Eloquent\\Relations\\BelongsTo\<App\\Models\\Ingredient, \$this\(App\\Models\\Inventory\)\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/Inventory.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:session\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\Rating\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Rating.php
+
+		-
+			message: '#^Method App\\Models\\Rating\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Rating.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$abv\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$glass\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$instructions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$volume\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ingredient_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$note\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Class App\\Models\\Recipe uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Method App\\Models\\Recipe\:\:ingredients\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Method App\\Models\\Recipe\:\:recipeIngredients\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Method App\\Models\\Recipe\:\:tags\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Recipe.php
+
+		-
+			message: '#^Method App\\Models\\RecipeIngredient\:\:ingredient\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RecipeIngredient.php
+
+		-
+			message: '#^Method App\\Models\\RecipeIngredient\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/RecipeIngredient.php
+
+		-
+			message: '#^Class App\\Models\\User uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Method App\\Services\\BarSchedule\:\:currentWindow\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/BarSchedule.php
+
+		-
+			message: '#^Method App\\Services\\BarSchedule\:\:windowFor\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/BarSchedule.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Ingredient\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Inventory/AddInventoryAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$username\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
+
+		-
+			message: '#^Call to an undefined method App\\Data\\Search\\GetRecipeResult\:\:toTelegramMessage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/UI/Http/Actions/Search/BrowseRecipesAction.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/UI/Http/Actions/Search/BrowseRecipesAction.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\BarSession\:\:\$started_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/UI/Http/Actions/Session/SessionAction.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Http/Actions/StartAction.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Middleware/AuthenticateTelegramUser.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Ingredient\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Conversations/AddInventoryConversation.php
+
+		-
+			message: '#^Method App\\UI\\Telegram\\Conversations\\AddInventoryConversation\:\:parseQuantity\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/UI/Telegram/Conversations/AddInventoryConversation.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>data" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Telegram/Conversations/AddInventoryConversation.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>text" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Telegram/Conversations/AddInventoryConversation.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 2
+			path: app/UI/Telegram/Conversations/FilterConversation.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>data" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 5
+			path: app/UI/Telegram/Conversations/FilterConversation.php
+
+		-
+			message: '#^Property App\\UI\\Telegram\\Conversations\\ListFavoritesConversation\:\:\$pageRecipeIds type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/UI/Telegram/Conversations/ListFavoritesConversation.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>text" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Telegram/Conversations/ListFavoritesConversation.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Ingredient\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Conversations/SearchByIngredientConversation.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>data" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/UI/Telegram/Conversations/SearchByIngredientConversation.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Inventory\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Responses/InventoryListResponse.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Inventory\:\:\$unit\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Responses/InventoryListResponse.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$abv\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Responses/SearchResultsResponse.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_ru\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/UI/Telegram/Responses/SearchResultsResponse.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$volume\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/UI/Telegram/Responses/SearchResultsResponse.php
+
+		-
+			message: '#^Method App\\UI\\Telegram\\Responses\\SearchResultsResponse\:\:__construct\(\) has parameter \$avgRatings with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/UI/Telegram/Responses/SearchResultsResponse.php
+
+		-
+			message: '#^Method App\\UI\\Telegram\\Responses\\SearchResultsResponse\:\:__construct\(\) has parameter \$favoritedIds with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/UI/Telegram/Responses/SearchResultsResponse.php
+
+		-
+			message: '#^Method App\\UI\\Telegram\\TelegramController\:\:handle\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: app/UI/Telegram/TelegramController.php
