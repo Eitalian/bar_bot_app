@@ -1,220 +1,144 @@
 [
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "/",
-        "name": null,
-        "action": "Closure",
         "middleware": [
             "web"
-        ],
-        "path": "routes/web.php:5"
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "_boost/browser-logs",
-        "name": "boost.browser-logs",
-        "action": "Closure",
-        "middleware": [],
-        "path": "vendor/laravel/boost/src/BoostServiceProvider.php:92"
+        "middleware": []
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/bars/{id}/session",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Session\\SessionAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "api/bars/{id}/session",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Session\\StartSessionAction",
         "middleware": [
             "api",
             "auth.telegram",
             "App\\UI\\Middleware\\CanManageMiddleware"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/favorites",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Favorites\\ListFavoritesAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/inventory",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Inventory\\InventoryAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "api/inventory",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Inventory\\AddInventoryAction",
         "middleware": [
             "api",
             "auth.telegram",
             "App\\UI\\Middleware\\CanManageMiddleware"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "DELETE",
         "uri": "api/inventory/{id}",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Inventory\\RemoveInventoryAction@__invoke",
         "middleware": [
             "api",
             "auth.telegram",
             "App\\UI\\Middleware\\CanManageMiddleware"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "api/orders",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Orders\\PlaceOrderAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "PATCH",
         "uri": "api/orders/{id}/accept",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Orders\\AcceptOrderAction",
         "middleware": [
             "api",
             "auth.telegram",
             "App\\UI\\Middleware\\CanManageMiddleware"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "PATCH",
         "uri": "api/orders/{id}/cancel",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Orders\\CancelOrderAction",
         "middleware": [
             "api",
             "auth.telegram",
             "App\\UI\\Middleware\\CanManageMiddleware"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/recipes",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Search\\SearchRecipesAction",
         "middleware": [
             "api"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/recipes/{id}",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Search\\GetRecipeAction",
         "middleware": [
             "api"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "api/recipes/{id}/favorite",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Favorites\\FavoriteToggleAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "POST",
         "uri": "api/recipes/{id}/rate",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Ratings\\RateAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "api/sessions/{id}/orders",
-        "name": null,
-        "action": "App\\UI\\Http\\Actions\\Orders\\ListOrdersAction",
         "middleware": [
             "api",
             "auth.telegram"
-        ],
-        "path": null
+        ]
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "storage/{path}",
-        "name": "storage.local",
-        "action": "Closure",
-        "middleware": [],
-        "path": "vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:111"
+        "middleware": []
     },
     {
-        "domain": null,
         "method": "PUT",
         "uri": "storage/{path}",
-        "name": "storage.local.upload",
-        "action": "Closure",
-        "middleware": [],
-        "path": "vendor/laravel/framework/src/Illuminate/Filesystem/FilesystemServiceProvider.php:119"
+        "middleware": []
     },
     {
-        "domain": null,
         "method": "GET|HEAD",
         "uri": "up",
-        "name": null,
-        "action": "Closure",
-        "middleware": [],
-        "path": "vendor/laravel/framework/src/Illuminate/Foundation/Configuration/ApplicationBuilder.php:223"
+        "middleware": []
     }
 ]
