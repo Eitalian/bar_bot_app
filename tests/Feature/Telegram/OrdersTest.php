@@ -8,7 +8,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use SergiX44\Nutgram\Nutgram;
 
-afterEach(fn () => CarbonImmutable::setTestNow());
+afterEach(fn() => CarbonImmutable::setTestNow());
 
 it('recipe:{id}:order показывает выбор количества', function () {
     $telegramId = 111000040;

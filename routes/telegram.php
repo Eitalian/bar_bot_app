@@ -63,7 +63,7 @@ $bot->group(function (Nutgram $bot): void {
 })->middleware(CanManageMiddleware::class);
 
 // Phase 3.1: Orders
-$bot->onCallbackQueryData('recipe:{id}:order',       [PlaceOrderAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:order', [PlaceOrderAction::class, 'fromTelegram']);
 $bot->onCallbackQueryData('recipe:{id}:order:{qty}', [PlaceOrderAction::class, 'confirm']);
 $bot->onCallbackQueryData('orders:my', [ListOrdersAction::class, 'fromTelegram']);
 

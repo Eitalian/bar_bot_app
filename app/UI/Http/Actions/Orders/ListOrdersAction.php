@@ -51,7 +51,7 @@ final class ListOrdersAction
 
         if ($orders->isEmpty()) {
             $bot->sendMessage(
-                text:         'Заказов пока нет 🍹',
+                text: 'Заказов пока нет 🍹',
                 reply_markup: InlineKeyboardMarkup::make()
                     ->addRow(InlineKeyboardButton::make('🏠 Главное меню', callback_data: 'browse:back')),
             );
@@ -77,8 +77,8 @@ final class ListOrdersAction
         $title = $authUser->role === UserRole::Guest ? '📋 *Твои заказы за вечер*' : '📋 *Заказы сессии*';
 
         $bot->sendMessage(
-            text:         "{$title}\n\n{$lines}",
-            parse_mode:   'Markdown',
+            text: "{$title}\n\n{$lines}",
+            parse_mode: 'Markdown',
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(InlineKeyboardButton::make('🏠 Главное меню', callback_data: 'browse:back')),
         );

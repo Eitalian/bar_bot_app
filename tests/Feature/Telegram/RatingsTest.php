@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Rating;
 use App\Models\Recipe;
 use App\Models\User;
 use SergiX44\Nutgram\Nutgram;

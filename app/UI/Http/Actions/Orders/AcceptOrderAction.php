@@ -16,7 +16,7 @@ final class AcceptOrderAction
     {
         try {
             $order = Bus::dispatch(new AcceptOrderData(
-                orderId:  $id,
+                orderId: $id,
                 quantity: (int) $request->input('quantity', 1),
             ));
         } catch (OrderAlreadyProcessedException $e) {
@@ -30,7 +30,7 @@ final class AcceptOrderAction
     {
         try {
             $order = Bus::dispatch(new AcceptOrderData(
-                orderId:  (int) $id,
+                orderId: (int) $id,
                 quantity: $n,
             ));
         } catch (OrderAlreadyProcessedException) {
@@ -43,7 +43,7 @@ final class AcceptOrderAction
 
         $recipe = $order->recipe;
         $bot->sendMessage(
-            text:    "✅ Заказ принят! {$recipe->name_ru} ×{$n} — уже готовим 🍸",
+            text: "✅ Заказ принят! {$recipe->name_ru} ×{$n} — уже готовим 🍸",
             chat_id: $order->user->telegram_id,
         );
     }

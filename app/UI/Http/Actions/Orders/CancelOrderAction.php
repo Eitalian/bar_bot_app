@@ -36,7 +36,7 @@ final class CancelOrderAction
 
         $recipe = $order->recipe;
         $bot->sendMessage(
-            text:    "❌ Заказ на {$recipe->name_ru} отклонён 😔",
+            text: "❌ Заказ на {$recipe->name_ru} отклонён 😔",
             chat_id: $order->user->telegram_id,
         );
     }

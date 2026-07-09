@@ -6,7 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
 use SergiX44\Nutgram\Nutgram;
 
-afterEach(fn () => CarbonImmutable::setTestNow());
+afterEach(fn() => CarbonImmutable::setTestNow());
 
 it('/session сообщает об открытой сессии', function () {
     CarbonImmutable::setTestNow('2026-05-10 18:00:00');

@@ -24,7 +24,7 @@ final class PlaceOrderAction
         try {
             $order = Bus::dispatch(new PlaceOrderData(
                 recipeId: (string) $request->input('recipe_id'),
-                userId:   $authUser->id,
+                userId: $authUser->id,
                 quantity: (int) $request->input('quantity', 1),
             ));
         } catch (NoActiveSessionException) {
@@ -60,7 +60,7 @@ final class PlaceOrderAction
         try {
             $order = Bus::dispatch(new PlaceOrderData(
                 recipeId: $id,
-                userId:   Auth::id(),
+                userId: Auth::id(),
                 quantity: $qty,
             ));
         } catch (NoActiveSessionException) {
@@ -74,7 +74,7 @@ final class PlaceOrderAction
         $bot->editMessageReplyMarkup(
             reply_markup: InlineKeyboardMarkup::make()
                 ->addRow(
-                    InlineKeyboardButton::make('🔙 К поиску',   callback_data: 'browse:back'),
+                    InlineKeyboardButton::make('🔙 К поиску', callback_data: 'browse:back'),
                     InlineKeyboardButton::make('📋 Мои заказы', callback_data: 'orders:my'),
                 ),
         );
@@ -93,10 +93,10 @@ final class PlaceOrderAction
         foreach ($managers as $manager) {
             try {
                 $bot->sendMessage(
-                    text: "🍹 *Новый заказ ×{$order->quantity}*\n\nКоктейль: {$recipe->name_ru}\nГость: {$guest->first_name}" .
-                          ($guest->username ? " (@{$guest->username})" : ''),
-                    chat_id:      $manager->telegram_id,
-                    parse_mode:   'Markdown',
+                    text: "🍹 *Новый заказ ×{$order->quantity}*\n\nКоктейль: {$recipe->name_ru}\nГость: {$guest->first_name}"
+                          . ($guest->username ? " (@{$guest->username})" : ''),
+                    chat_id: $manager->telegram_id,
+                    parse_mode: 'Markdown',
                     reply_markup: $keyboard,
                 );
             } catch (\Throwable) {
