@@ -56,10 +56,16 @@ make bot-webhook-delete
 make pint-dirty             # fix only changed files
 make pint-dirty-dry         # check without fixing
 
+# Static analysis (Larastan)
+make stan                   # phpstan analyse, level 6, с phpstan-baseline.neon
+
 # Tests (Pest)
 make tests
 make tests-feature
 make tests-unit
+
+# Handoff (перед передачей управления / завершением задачи)
+make handoff                 # tests + stan + pint-dirty-dry за один вызов
 
 # Cache
 make cache-clear
@@ -187,15 +193,16 @@ Advisor и Reviewer работают в разных направлениях:
 Перед передачей управления каждый агент обязан выполнить:
 
 ```
-1. docker compose exec app php artisan test  →  все тесты PASS, регрессий нет
-2. make pint-dirty-dry  →  0 изменений
-3. git status  →  нет незакоммиченных/неотслеживаемых файлов
-4. Все файлы задачи из секции "Files" существуют
-5. В отчёте: список изменённых файлов + краткое описание сделанного
-6. git diff HEAD~{N}..HEAD --name-only  →  файлы ВНЕ секции "Files" объяснены в отчёте
+1. make handoff  →  зелёный (tests + stan + pint-dirty-dry)
+2. git status  →  нет незакоммиченных/неотслеживаемых файлов
+3. Все файлы задачи из секции "Files" существуют
+4. В отчёте: список изменённых файлов + краткое описание сделанного
+5. git diff HEAD~{N}..HEAD --name-only  →  файлы ВНЕ секции "Files" объяснены в отчёте
 ```
 
-**Правило пункта 6:** файл вне секции "Files" — не автоматический стоп, но требует явного обоснования (ссылка на Step плана, где это предусмотрено). Файл без обоснования — reviewer отклоняет.
+**Правило пункта 5:** файл вне секции "Files" — не автоматический стоп, но требует явного обоснования (ссылка на Step плана, где это предусмотрено). Файл без обоснования — reviewer отклоняет.
+
+**Baseline-политика (`phpstan-baseline.neon`):** уменьшать можно, увеличивать нельзя. Почин существующей записи baseline при работе над затронутым кодом — приветствуется (удали запись из baseline вместе с фиксом). Новый код обязан быть чист по Larastan без добавления новых записей в baseline.
 
 **Следствие для авторов планов:** секция "Files" обязана перечислять **все** файлы, упомянутые в Steps — включая ancillary (`codebase.md`, дополнения к `routes/*.php` и т.д.).
 

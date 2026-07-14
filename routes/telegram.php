@@ -2,28 +2,27 @@
 
 /** @var Nutgram $bot */
 
-use App\Actions\Inventory\InventoryAction;
-use App\Actions\Inventory\RemoveInventoryAction;
-use App\Actions\Orders\AcceptOrderAction;
-use App\Actions\Orders\CancelOrderAction;
-use App\Actions\Orders\ListOrdersAction;
-use App\Actions\Favorites\FavoriteToggleAction;
-use App\Actions\Favorites\ListFavoritesAction;
-use App\Actions\Orders\PlaceOrderAction;
-use App\Actions\Ratings\RateAction;
-use App\Actions\Ratings\ShowRatingPickerAction;
-use App\Actions\Search\BrowseRecipesAction;
-use App\Actions\Search\GetRecipeAction;
-use App\Actions\Session\SessionAction;
-use App\Actions\Session\StartSessionAction;
-use App\Actions\StartAction;
-use App\Middleware\CanManageMiddleware;
-use App\Telegram\Conversations\AddInventoryConversation;
-use App\Telegram\Conversations\FilterConversation;
-use App\Telegram\Conversations\ListFavoritesConversation;
-use App\Telegram\Conversations\SearchByIngredientConversation;
-use App\Telegram\Conversations\SearchByNameConversation;
-use App\Telegram\Middleware\AuthenticateTelegramUser;
+use App\UI\Http\Actions\Favorites\FavoriteToggleAction;
+use App\UI\Http\Actions\Inventory\InventoryAction;
+use App\UI\Http\Actions\Inventory\RemoveInventoryAction;
+use App\UI\Http\Actions\Orders\AcceptOrderAction;
+use App\UI\Http\Actions\Orders\CancelOrderAction;
+use App\UI\Http\Actions\Orders\ListOrdersAction;
+use App\UI\Http\Actions\Orders\PlaceOrderAction;
+use App\UI\Http\Actions\Ratings\RateAction;
+use App\UI\Http\Actions\Ratings\ShowRatingPickerAction;
+use App\UI\Http\Actions\Search\BrowseRecipesAction;
+use App\UI\Http\Actions\Search\GetRecipeAction;
+use App\UI\Http\Actions\Session\SessionAction;
+use App\UI\Http\Actions\Session\StartSessionAction;
+use App\UI\Http\Actions\StartAction;
+use App\UI\Middleware\AuthenticateTelegramUser;
+use App\UI\Middleware\CanManageMiddleware;
+use App\UI\Telegram\Conversations\AddInventoryConversation;
+use App\UI\Telegram\Conversations\FilterConversation;
+use App\UI\Telegram\Conversations\ListFavoritesConversation;
+use App\UI\Telegram\Conversations\SearchByIngredientConversation;
+use App\UI\Telegram\Conversations\SearchByNameConversation;
 use Illuminate\Auth\Access\AuthorizationException;
 use SergiX44\Nutgram\Nutgram;
 
@@ -64,14 +63,14 @@ $bot->group(function (Nutgram $bot): void {
 })->middleware(CanManageMiddleware::class);
 
 // Phase 3.1: Orders
-$bot->onCallbackQueryData('recipe:{id}:order',       [PlaceOrderAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:order', [PlaceOrderAction::class, 'fromTelegram']);
 $bot->onCallbackQueryData('recipe:{id}:order:{qty}', [PlaceOrderAction::class, 'confirm']);
 $bot->onCallbackQueryData('orders:my', [ListOrdersAction::class, 'fromTelegram']);
 
 // Phase 4: Favorites & Ratings
 $bot->onCommand('favorites', fn(Nutgram $bot) => ListFavoritesConversation::begin($bot));
 $bot->onCallbackQueryData('recipe:{id}:favorite', [FavoriteToggleAction::class, 'fromTelegram']);
-$bot->onCallbackQueryData('recipe:{id}:rate:{score}', [RateAction::class, 'fromTelegram']);
+$bot->onCallbackQueryData('recipe:{id}:rate:{score}', [RateAction::class, 'fromTelegram'])->whereNumber('score');
 $bot->onCallbackQueryData('recipe:{id}:rate:new', [ShowRatingPickerAction::class, 'fromTelegram']);
 
 $bot->group(function (Nutgram $bot): void {

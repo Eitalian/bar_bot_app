@@ -151,6 +151,15 @@ tests-create:
 tests-create-unit:
 	${ARTISAN} make:test --unit
 
+# ── Static analysis ───────────────────────────────────────────────────────────
+
+stan:
+	${CONTAINER} php ./vendor/bin/phpstan analyse --memory-limit=1G
+
+# ── Handoff ───────────────────────────────────────────────────────────────────
+
+handoff: tests stan pint-dirty-dry
+
 # ── Composer ──────────────────────────────────────────────────────────────────
 
 composer-install:

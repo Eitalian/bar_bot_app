@@ -1,19 +1,20 @@
 <?php
 
-use App\Actions\Inventory\AddInventoryAction;
-use App\Actions\Inventory\InventoryAction;
-use App\Actions\Inventory\RemoveInventoryAction;
-use App\Actions\Orders\AcceptOrderAction;
-use App\Actions\Orders\CancelOrderAction;
-use App\Actions\Orders\ListOrdersAction;
-use App\Actions\Orders\PlaceOrderAction;
-use App\Actions\Favorites\FavoriteToggleAction;
-use App\Actions\Favorites\ListFavoritesAction;
-use App\Actions\Search\GetRecipeAction;
-use App\Actions\Search\SearchRecipesAction;
-use App\Actions\Session\SessionAction;
-use App\Actions\Session\StartSessionAction;
-use App\Middleware\CanManageMiddleware;
+use App\UI\Http\Actions\Favorites\FavoriteToggleAction;
+use App\UI\Http\Actions\Favorites\ListFavoritesAction;
+use App\UI\Http\Actions\Inventory\AddInventoryAction;
+use App\UI\Http\Actions\Inventory\InventoryAction;
+use App\UI\Http\Actions\Inventory\RemoveInventoryAction;
+use App\UI\Http\Actions\Orders\AcceptOrderAction;
+use App\UI\Http\Actions\Orders\CancelOrderAction;
+use App\UI\Http\Actions\Orders\ListOrdersAction;
+use App\UI\Http\Actions\Orders\PlaceOrderAction;
+use App\UI\Http\Actions\Ratings\RateAction;
+use App\UI\Http\Actions\Search\GetRecipeAction;
+use App\UI\Http\Actions\Search\SearchRecipesAction;
+use App\UI\Http\Actions\Session\SessionAction;
+use App\UI\Http\Actions\Session\StartSessionAction;
+use App\UI\Middleware\CanManageMiddleware;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('recipes')->group(function () {
@@ -50,5 +51,5 @@ Route::middleware('auth.telegram')->group(function () {
     Route::get('/favorites', ListFavoritesAction::class);
 
     // BB-11: Ratings (temporary route)
-    Route::post('/recipes/{id}/rate', \App\Actions\Ratings\RateAction::class);
+    Route::post('/recipes/{id}/rate', RateAction::class);
 });

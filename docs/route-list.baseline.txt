@@ -1,0 +1,144 @@
+[
+    {
+        "method": "GET|HEAD",
+        "uri": "/",
+        "middleware": [
+            "web"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "_boost/browser-logs",
+        "middleware": []
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/bars/{id}/session",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "api/bars/{id}/session",
+        "middleware": [
+            "api",
+            "auth.telegram",
+            "App\\UI\\Middleware\\CanManageMiddleware"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/favorites",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/inventory",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "api/inventory",
+        "middleware": [
+            "api",
+            "auth.telegram",
+            "App\\UI\\Middleware\\CanManageMiddleware"
+        ]
+    },
+    {
+        "method": "DELETE",
+        "uri": "api/inventory/{id}",
+        "middleware": [
+            "api",
+            "auth.telegram",
+            "App\\UI\\Middleware\\CanManageMiddleware"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "api/orders",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "PATCH",
+        "uri": "api/orders/{id}/accept",
+        "middleware": [
+            "api",
+            "auth.telegram",
+            "App\\UI\\Middleware\\CanManageMiddleware"
+        ]
+    },
+    {
+        "method": "PATCH",
+        "uri": "api/orders/{id}/cancel",
+        "middleware": [
+            "api",
+            "auth.telegram",
+            "App\\UI\\Middleware\\CanManageMiddleware"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/recipes",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/recipes/{id}",
+        "middleware": [
+            "api"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "api/recipes/{id}/favorite",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "POST",
+        "uri": "api/recipes/{id}/rate",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "api/sessions/{id}/orders",
+        "middleware": [
+            "api",
+            "auth.telegram"
+        ]
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "storage/{path}",
+        "middleware": []
+    },
+    {
+        "method": "PUT",
+        "uri": "storage/{path}",
+        "middleware": []
+    },
+    {
+        "method": "GET|HEAD",
+        "uri": "up",
+        "middleware": []
+    }
+]
