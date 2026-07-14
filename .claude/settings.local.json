@@ -24,7 +24,12 @@
       "mcp__laravel-boost__application-info",
       "mcp__laravel-boost__read-log-entries",
       "mcp__laravel-boost__last-error",
-      "mcp__laravel-boost__get-absolute-url"
+      "mcp__laravel-boost__get-absolute-url",
+      "mcp__claude_ai_Context7__resolve-library-id",
+      "WebFetch(domain:nutgram.dev)",
+      "Bash(npx -y @upstash/context7-mcp --help)",
+      "Bash(setx CONTEXT7_API_KEY *)",
+      "mcp__context7__query-docs"
     ],
     "deny": [
       "Bash(git push origin master)",
@@ -65,5 +70,9 @@
       "mcp__laravel-boost__database-schema",
       "mcp__laravel-boost__database-connections"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ]
 }

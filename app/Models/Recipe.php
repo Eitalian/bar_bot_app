@@ -7,6 +7,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $id
+ * @property string $name_ru
+ * @property string|null $name_en
+ * @property string|null $description
+ * @property string|null $instructions
+ * @property string|null $glass
+ * @property float|null $abv
+ * @property int|null $volume
+ * @property string|null $icon
+ * @property string|null $photo
+ * @property array<int, string>|null $taste_tags
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ */
 final class Recipe extends Model
 {
     use HasFactory;

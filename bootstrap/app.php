@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withCommands([
+        app_path('UI/Console/Commands'),
+    ])
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'auth.telegram' => AuthenticateByTelegramId::class,

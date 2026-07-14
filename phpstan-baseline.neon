@@ -25,18 +25,6 @@ parameters:
 			path: app/Data/Search/SearchResult.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Handlers/Orders/AcceptOrderHandler.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Handlers/Orders/CancelOrderHandler.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Rating\:\:\$avg\.$#'
 			identifier: property.notFound
 			count: 1
@@ -91,24 +79,6 @@ parameters:
 			path: app/Models/Inventory.php
 
 		-
-			message: '#^Method App\\Models\\Order\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Order.php
-
-		-
-			message: '#^Method App\\Models\\Order\:\:session\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Order.php
-
-		-
-			message: '#^Method App\\Models\\Order\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Order.php
-
-		-
 			message: '#^Method App\\Models\\Rating\:\:recipe\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
@@ -119,48 +89,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: app/Models/Rating.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$abv\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$description\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$glass\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$instructions\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_en\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_ru\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$volume\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/Recipe.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
@@ -245,54 +173,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/UI/Http/Actions/Inventory/AddInventoryAction.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Order\:\:\$quantity\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Order\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ru\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/ListOrdersAction.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Order\:\:\$quantity\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ru\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$username\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Http/Actions/Orders/PlaceOrderAction.php
 
 		-
 			message: '#^Access to an undefined property App\\Models\\BarSession\:\:\$started_at\.$#'
@@ -383,24 +263,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/UI/Telegram/Responses/InventoryListResponse.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$abv\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Telegram/Responses/SearchResultsResponse.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$name_ru\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/UI/Telegram/Responses/SearchResultsResponse.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Recipe\:\:\$volume\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/UI/Telegram/Responses/SearchResultsResponse.php
 
 		-
 			message: '#^Method App\\UI\\Telegram\\Responses\\SearchResultsResponse\:\:__construct\(\) has parameter \$avgRatings with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
