@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * HTTP-транспорт: пользователь должен уже существовать (создаётся только через Telegram-старт).
+ * См. также App\UI\Middleware\AuthenticateTelegramUser — для Telegram-транспорта политика
+ * иная (auto-create), это осознанное расхождение, а не дублирование одной и той же логики.
+ */
 final class AuthenticateByTelegramId
 {
     public function handle(Request $request, Closure $next): Response
